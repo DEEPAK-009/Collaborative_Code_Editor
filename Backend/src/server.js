@@ -1,29 +1,30 @@
-// Server startup only
+// Client
+//    ↓
+// HTTP Server
+//    ↓
+// Express + Socket.IO
 
 require("dotenv").config();
+
 const http = require("http");
-const { Server } = require("socket.io");
 const app = require("./app");
-
-const PORT = process.env.PORT || 5050;
-
-const server = http.createServer(app);
-
 const connectDB = require("./config/db");
+const socketHandler = require("./sockets/socketHandler");
+const { Server } = require("socket.io");
+
+const PORT = process.env.PORT || 6000;
 
 connectDB();
+
+const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
     origin: "*"
   }
 });
-
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-});
+socketHandler(io);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
