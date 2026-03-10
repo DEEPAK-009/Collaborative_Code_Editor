@@ -17,6 +17,27 @@ const createRoom = async (req, res) => {
   }
 };
 
+const joinRoom = async (req, res) => {
+  try {
+
+    const { roomId } = req.params;
+    const { userId } = req.body;
+
+    const room = await roomService.joinRoom(roomId, userId);
+
+    res.status(200).json(room);
+
+  } catch (error) {
+
+    if (error.message === "Room not found") {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
-  createRoom
+  createRoom,
+  joinRoom
 };

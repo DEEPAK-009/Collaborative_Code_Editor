@@ -1,1 +1,0 @@
-Controllers handle HTTP requests.
