@@ -65,3 +65,10 @@ Service
       ↓
 Model (Database)
 
+
+1️⃣ What a Socket Is
+A socket is a persistent connection between the client (browser) and the server.
+Unlike HTTP:
+    HTTP → request → response → connection closes
+    Socket → connection stays open
+This allows real-time communication.
