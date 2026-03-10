@@ -1,9 +1,8 @@
+const roomService = require("../services/roomService");
+
 const socketHandler = (io) => {
-
   io.on("connection", (socket) => {
-
     console.log("User connected:", socket.id);
-
     socket.on("join-room", ({ roomId, userId }) => {
       socket.join(roomId);
       console.log(`${userId} joined room ${roomId}`);
@@ -11,7 +10,11 @@ const socketHandler = (io) => {
         userId,
         socketId: socket.id
       });
+    });
 
+    socket.on("code-change", async ({ roomId, code }) => {
+        await roomService.updateRoomCode(roomId, code);
+        socket.to(roomId).emit("code-update", { code });
     });
 
     socket.on("leave-room", ({ roomId, userId }) => {
