@@ -8,9 +8,6 @@ const server = http.createServer(app);
 
 require("dotenv").config();
 const connectDB = require("./config/db");
-const http = require("http");
-const { Server } = require("socket.io");
-const app = require("./app");
 
 connectDB();
 
