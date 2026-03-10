@@ -6,6 +6,10 @@ const socketHandler = (io) => {
     socket.on("join-room", ({ roomId, userId }) => {
       socket.join(roomId);
       console.log(`${userId} joined room ${roomId}`);
+      // send existing code to the user who joined
+      socket.emit("load-code", {
+        code: room.code
+      });
       socket.to(roomId).emit("user-joined", {
         userId,
         socketId: socket.id
