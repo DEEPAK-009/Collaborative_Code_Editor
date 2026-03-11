@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/server.js",
+    "dev": "nodemon src/server.js --ignore temp/",
     "start": "node src/server.js"
   },
   "keywords": [],
@@ -19,6 +19,9 @@
     "mongoose": "^9.2.4",
     "socket.io": "^4.8.3",
     "uuid": "^13.0.0"
+  },
+  "nodemonConfig": {
+    "ignore": ["temp/*"]
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
