@@ -57,29 +57,20 @@ const removeUserFromRoom = async (req, res) => {
 };
 
 const transferOwnershipController = async (req, res) => {
-
   try {
-
     const { roomId, newOwnerId } = req.body;
 
-    const room = await roomService.transferOwnership(
-      roomId,
-      newOwnerId
-    );
+    const room = await roomService.transferOwnership(roomId, newOwnerId);
 
     res.json(room);
-
   } catch (error) {
-
     res.status(400).json({ error: error.message });
-
   }
-
 };
 module.exports = {
   createRoom,
   joinRoom,
   changeRole,
   removeUserFromRoom,
-  transferOwnershipController
+  transferOwnershipController,
 };

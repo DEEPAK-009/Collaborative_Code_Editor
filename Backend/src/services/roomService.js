@@ -89,6 +89,44 @@ const transferOwnership = async (roomId, newOwnerId) => {
   return room;
 };
 
+const deleteRoom = async (roomId) => {
+  await Room.deleteOne({ roomId });
+  await ChatMessage.deleteMany({ roomId });
+};
+
+const autoTransferOwnership = async (roomId) => {
+  const room = await Room.findOne({ roomId });
+
+  if (!room) return null;
+
+  const editors = room.members.filter((m) => m.role === "editor");
+
+  const viewers = room.members.filter((m) => m.role === "viewer");
+
+  let newOwner = null;
+
+  if (editors.length > 0) {
+    newOwner = editors[0];
+  } else if (viewers.length > 0) {
+    newOwner = viewers[0];
+  }
+
+  if (!newOwner) return null;
+
+  room.ownerId = newOwner.userId;
+
+  room.members.forEach((member) => {
+    if (member.userId === newOwner.userId) {
+      member.role = "owner";
+    } else if (member.role === "owner") {
+      member.role = "editor";
+    }
+  });
+
+  await room.save();
+
+  return newOwner;
+};
 module.exports = {
   createRoom,
   joinRoom,
@@ -96,4 +134,6 @@ module.exports = {
   changeUserRole,
   removeUser,
   transferOwnership,
+  deleteRoom,
+  autoTransferOwnership,
 };
