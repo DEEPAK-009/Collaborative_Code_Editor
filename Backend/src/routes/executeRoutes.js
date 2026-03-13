@@ -3,7 +3,12 @@ const express = require("express");
 const router = express.Router();
 
 const executeController = require("../controllers/executeController");
+const executionLimiter = require("../utils/rateLimiter");
 
-router.post("/execute", executeController.executeCode);
+router.post(
+  "/execute",
+  executionLimiter,
+  executeController.executeCode
+);
 
 module.exports = router;
