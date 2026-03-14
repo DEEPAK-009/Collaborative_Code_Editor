@@ -3,6 +3,12 @@ const chatService = require("../services/chatService");
 
 const rooms = {};
 
+const isUserInRoom = (roomId, userId) => {
+  if (!rooms[roomId]) return false;
+
+  return rooms[roomId].some((u) => u.userId === userId);
+};
+
 const socketHandler = (io) => {
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
@@ -10,10 +16,11 @@ const socketHandler = (io) => {
     const lastCursorUpdate = {};
 
     // JOIN ROOM
-    socket.on("join-room", async ({ roomId, userId }) => {
-      socket.join(roomId);
-
+    socket.on("join-room", async ({ roomId }) => {
+      const userId = socket.user.id;
       const room = await roomService.joinRoom(roomId, userId);
+      if (!room) return;
+      socket.join(roomId);
 
       socket.emit("load-code", { code: room.code });
 
@@ -49,6 +56,8 @@ const socketHandler = (io) => {
 
     // CODE CHANGE
     socket.on("code-change", async ({ roomId, code }) => {
+      const userId = socket.user.id;
+      if (!isUserInRoom(roomId, userId)) return;
       await roomService.updateRoomCode(roomId, code);
 
       socket.to(roomId).emit("code-update", { code });
@@ -57,7 +66,9 @@ const socketHandler = (io) => {
     });
 
     // CHAT MESSAGE
-    socket.on("send-message", async ({ roomId, userId, message }) => {
+    socket.on("send-message", async ({ roomId, message }) => {
+      const userId = socket.user.id;
+      if (!isUserInRoom(roomId, userId)) return;
       const savedMessage = await chatService.saveMessage(
         roomId,
         userId,
@@ -68,12 +79,15 @@ const socketHandler = (io) => {
     });
 
     // LEAVE ROOM
-    socket.on("leave-room", ({ roomId, userId }) => {
+    socket.on("leave-room", ({ roomId }) => {
+      const userId = socket.user.id;
+      if (!isUserInRoom(roomId, userId)) return;
+
       socket.leave(roomId);
 
       if (!rooms[roomId]) return;
 
-      rooms[roomId] = rooms[roomId].filter((u) => u.userId !== userId);
+      rooms[roomId] = rooms[roomId].filter((u) => u.socketId !== socket.id);
 
       io.to(roomId).emit("users-update", rooms[roomId]);
 
@@ -124,9 +138,10 @@ const socketHandler = (io) => {
     });
 
     // CURSOR MOVE
-    socket.on("cursor_move", ({ roomId, userId, username, position }) => {
+    socket.on("cursor_move", ({ roomId, username, position }) => {
+      const userId = socket.user.id;
       const now = Date.now();
-
+      if (!isUserInRoom(roomId, userId)) return;
       if (
         lastCursorUpdate[socket.id] &&
         now - lastCursorUpdate[socket.id] < 100

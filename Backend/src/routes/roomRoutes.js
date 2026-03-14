@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const roomController = require("../controllers/roomController");
+const authenticateUser = require("../middleware/authMiddleware");
+
+router.use(authenticateUser);
 
 router.post("/rooms", roomController.createRoom);
 router.get("/rooms/:roomId", roomController.joinRoom);

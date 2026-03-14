@@ -1,4 +1,6 @@
 const authService = require("../services/authService");
+const jwt = require("jsonwebtoken");
+
 const signup = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -47,12 +49,26 @@ const login = async (req, res) => {
   }
 };
 
+// function is no longer needed once you switch to Passport for Google OAuth.
 const googleAuth = async (req, res) => {
   res.json({ message: "Google auth route working" });
 };
 
+// The controller is only used after Google finishes authentication.
 const googleCallback = async (req, res) => {
-  res.json({ message: "Google callback route working" });
+  const user = req.user;
+  const token = jwt.sign(
+    {
+      id: user._id,
+      email: user.email
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES
+    }
+  );
+  const redirectURL = `http://localhost:3000/oauth-success?token=${token}`;
+  res.redirect(redirectURL);
 };
 
 module.exports = {

@@ -5,6 +5,8 @@ const cors = require("cors");
 const roomRoutes = require("./routes/roomRoutes");
 const executeRoutes = require("./routes/executeRoutes");
 const authRoutes = require("./routes/authRoutes");
+const passport = require("./config/passport");
+
 
 const app = express();
 
@@ -13,6 +15,7 @@ app.use(express.json());
 app.use("/api", roomRoutes);
 app.use("/api", executeRoutes);
 app.use("/api/auth", authRoutes);
+app.use(passport.initialize());
 
 app.get("/", (req, res) => {
   res.send("Collaborative Editor Backend Running");
