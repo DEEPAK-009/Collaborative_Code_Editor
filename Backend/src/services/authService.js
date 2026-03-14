@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-
+// console.log("JWT_SECRET:", process.env.JWT_SECRET);
 const signupUser = async (email, password) => {
   const existingUser = await User.findOne({ email });
 
@@ -29,6 +30,38 @@ const signupUser = async (email, password) => {
   return user;
 };
 
+const loginUser = async (email, password) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new Error("Invalid email or password");
+  }
+
+  if (!user.password) {
+    throw new Error("Please login using Google authentication");
+  }
+
+  const validPassword = await bcrypt.compare(password, user.password);
+
+  if (!validPassword) {
+    throw new Error("Invalid email or password");
+  }
+
+  const token = jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES,
+    },
+  );
+
+  return { user, token };
+};
+
 module.exports = {
   signupUser,
+  loginUser,
 };
