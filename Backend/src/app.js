@@ -9,13 +9,15 @@ const passport = require("./config/passport");
 
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
+
+// these are run one after the other , so order is very imp . 
+app.use("/api/auth", authRoutes);
 app.use("/api", roomRoutes);
 app.use("/api", executeRoutes);
-app.use("/api/auth", authRoutes);
-app.use(passport.initialize());
+
 
 app.get("/", (req, res) => {
   res.send("Collaborative Editor Backend Running");
