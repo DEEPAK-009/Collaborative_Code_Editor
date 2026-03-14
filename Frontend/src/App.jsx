@@ -1,13 +1,11 @@
-import { useState } from 'react'
+import AuthPage from "./pages/AuthPage.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      
+      <AuthPage />;
     </>
   )
 }
 
-export default App
+export default App 
