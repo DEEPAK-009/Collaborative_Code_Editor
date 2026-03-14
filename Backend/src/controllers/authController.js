@@ -9,10 +9,11 @@ const signup = async (req, res) => {
       });
     }
 
-    const user = await authService.signupUser(email, password);
+    const { user, token } = await authService.signupUser(email, password);
 
     res.status(201).json({
       message: "User created",
+      token,
       user: {
         id: user._id,
         email: user.email,

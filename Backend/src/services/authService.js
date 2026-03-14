@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-// console.log("JWT_SECRET:", process.env.JWT_SECRET);
+
 const signupUser = async (email, password) => {
   const existingUser = await User.findOne({ email });
 
@@ -10,7 +10,7 @@ const signupUser = async (email, password) => {
     // If account created with Google only
     if (!existingUser.password) {
       throw new Error(
-        "Account exists with Google login. Please login with Google or set a password.",
+        "Account exists with Google login. Please login with Google or set a password."
       );
     }
 
@@ -27,7 +27,19 @@ const signupUser = async (email, password) => {
 
   await user.save();
 
-  return user;
+  // Generate JWT token
+  const token = jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES,
+    }
+  );
+
+  return { user, token };
 };
 
 const loginUser = async (email, password) => {
@@ -55,7 +67,7 @@ const loginUser = async (email, password) => {
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRES,
-    },
+    }
   );
 
   return { user, token };
