@@ -1,7 +1,35 @@
+const authService = require("../services/authService");
 const signup = async (req, res) => {
-  res.json({ message: "Signup route working" });
-};
 
+  try {
+
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        error: "Email and password required"
+      });
+    }
+
+    const user = await authService.signupUser(email, password);
+
+    res.status(201).json({
+      message: "User created",
+      user: {
+        id: user._id,
+        email: user.email
+      }
+    });
+
+  } catch (error) {
+
+    res.status(400).json({
+      error: error.message
+    });
+
+  }
+
+};
 const login = async (req, res) => {
   res.json({ message: "Login route working" });
 };
