@@ -3,9 +3,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import OAuthSuccess from "./pages/OAuthSuccess";
-// import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/Dashboard";
 // import Editor from "./pages/Editor";
-// import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -14,15 +14,15 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
-        {/* <Route path="/dashboard" element={
+        <Route path="/dashboard" element={
           <ProtectedRoute>
           <Dashboard />
           </ProtectedRoute>} />
 
-        <Route path="/editor/:roomId" element={
+        {/* <Route path="/editor/:roomId" element={
           <ProtectedRoute>
           <Editor />
-          </ProtectedRoute>} /> */}
+          </ProtectedRoute>} />  */}
       </Routes>
     </BrowserRouter>
   );

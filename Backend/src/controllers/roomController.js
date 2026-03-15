@@ -18,7 +18,8 @@ const createRoom = async (req, res) => {
 const joinRoom = async (req, res) => {
   try {
     const { roomId } = req.params;
-    const { userId } = req.body;
+    // const { userId } = req.body;
+    const userId = req.user.id;
 
     const room = await roomService.joinRoom(roomId, userId);
 
