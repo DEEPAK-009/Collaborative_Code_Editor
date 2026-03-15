@@ -1,3 +1,6 @@
+import { useParams } from "react-router-dom";
+import { useState } from "react";
+
 import Header from "../components/Header";
 import CodeEditor from "../components/CodeEditor";
 import Chat from "../components/Chat";
@@ -5,27 +8,39 @@ import Participants from "../components/Participants";
 import Output from "../components/Output";
 
 const Editor = () => {
+  const { roomId } = useParams();
+
+  const [code, setCode] = useState("");
+  const [language, setLanguage] = useState("python");
+  const [output, setOutput] = useState("");
+
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       
-      <Header />
+      <Header
+        roomId={roomId}
+        language={language}
+        setLanguage={setLanguage}
+      />
 
       <div style={{ flex: 1, display: "flex" }}>
         
-        {/* CODE + OUTPUT */}
         <div style={{ flex: 3, display: "flex", flexDirection: "column" }}>
-          <CodeEditor />
-          <Output />
+          <CodeEditor
+            code={code}
+            setCode={setCode}
+            language={language}
+          />
+
+          <Output output={output} />
         </div>
 
-        {/* CHAT */}
         <div style={{ flex: 1 }}>
-          <Chat />
+          <Chat roomId={roomId} />
         </div>
 
-        {/* PARTICIPANTS */}
         <div style={{ width: "250px" }}>
-          <Participants />
+          <Participants roomId={roomId} />
         </div>
 
       </div>

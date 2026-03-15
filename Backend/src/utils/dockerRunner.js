@@ -6,9 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const languageConfig = require("./languageConfig");
 
 const runCode = (language, code) => {
-
   return new Promise((resolve, reject) => {
-
     const config = languageConfig[language];
 
     if (!config) {
@@ -37,28 +35,25 @@ const runCode = (language, code) => {
 
     console.log("Running command:", dockerCommand);
     console.log(`Executing ${language} code in container`);
-    
-    exec(dockerCommand, { timeout: 5000 }, (error, stdout, stderr) => {
 
+    exec(dockerCommand, { timeout: 5000 }, (error, stdout, stderr) => {
       console.log("STDOUT:", stdout);
       console.log("STDERR:", stderr);
       fs.rmSync(dirPath, { recursive: true, force: true });
 
       if (error) {
         if (error.killed) {
-            return resolve("Execution timed out");
+          return resolve("Execution timed out");
         }
         return resolve(stderr || error.message);
       }
 
       // if program produced error output
-        if (stderr) {
-            return resolve(stderr);
-        }
+      if (stderr) {
+        return resolve(stderr);
+      }
       resolve(stdout);
-
     });
-
   });
 };
 
