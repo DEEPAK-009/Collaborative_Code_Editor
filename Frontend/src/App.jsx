@@ -4,7 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import OAuthSuccess from "./pages/OAuthSuccess";
 import Dashboard from "./pages/Dashboard";
-// import Editor from "./pages/Editor";
+import Editor from "./pages/Editor";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -19,10 +19,10 @@ function App() {
           <Dashboard />
           </ProtectedRoute>} />
 
-        {/* <Route path="/editor/:roomId" element={
+        <Route path="/editor/:roomId" element={
           <ProtectedRoute>
           <Editor />
-          </ProtectedRoute>} />  */}
+          </ProtectedRoute>} /> 
       </Routes>
     </BrowserRouter>
   );
