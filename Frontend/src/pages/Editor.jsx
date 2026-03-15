@@ -1,8 +1,9 @@
 import { useParams } from "react-router-dom";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { runCode } from "../api/execute";
 import { AuthContext } from "../context/AuthContext";
 
+import socket from "../socket/socket";
 import Header from "../components/Header";
 import CodeEditor from "../components/CodeEditor";
 import Chat from "../components/Chat";
@@ -18,6 +19,39 @@ const Editor = () => {
 
   const { token } = useContext(AuthContext);
 
+  // socket connection
+  useEffect(() => {
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    socket.connect();
+    socket.emit("join-room", { roomId });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [roomId]);
+
+  useEffect(() => {
+    socket.on("load-code", ({ code }) => {
+      setCode(code);
+    });
+
+    socket.on("code-update", ({ code }) => {
+      setCode(code);
+    });
+
+    return () => {
+      socket.off("load-code");
+      socket.off("code-update");
+    };
+  }, []);
+
   const handleRun = async () => {
     try {
       const res = await runCode(language, code, token);
@@ -29,7 +63,6 @@ const Editor = () => {
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-
       <Header
         roomId={roomId}
         language={language}
@@ -38,12 +71,8 @@ const Editor = () => {
       />
 
       <div style={{ flex: 1, display: "flex" }}>
-
         <div style={{ flex: 3, display: "flex", flexDirection: "column" }}>
-          <CodeEditor 
-            code={code} 
-            setCode={setCode} 
-          />
+          <CodeEditor code={code} setCode={setCode} roomId={roomId} />
 
           <Output output={output} />
         </div>
@@ -55,9 +84,7 @@ const Editor = () => {
         <div style={{ width: "250px" }}>
           <Participants roomId={roomId} />
         </div>
-
       </div>
-
     </div>
   );
 };

@@ -1,8 +1,19 @@
-const CodeEditor = ({ code, setCode }) => {
+const CodeEditor = ({ code, setCode, roomId }) => {
+  const handleChange = (e) => {
+    const newCode = e.target.value;
+
+    setCode(newCode);
+
+    socket.emit("code-change", {
+      roomId,
+      code: newCode,
+    });
+  };
+
   return (
     <textarea
       value={code}
-      onChange={(e) => setCode(e.target.value)}
+      onChange={handleChange}
       style={{
         width: "100%",
         height: "100%",
