@@ -1,5 +1,7 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { runCode } from "../api/execute";
+import { AuthContext } from "../context/AuthContext";
 
 import Header from "../components/Header";
 import CodeEditor from "../components/CodeEditor";
@@ -14,22 +16,33 @@ const Editor = () => {
   const [language, setLanguage] = useState("python");
   const [output, setOutput] = useState("");
 
+  const { token } = useContext(AuthContext);
+
+  const handleRun = async () => {
+    try {
+      const res = await runCode(language, code, token);
+      setOutput(res.data.output);
+    } catch (err) {
+      setOutput("Execution failed");
+    }
+  };
+
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      
+
       <Header
         roomId={roomId}
         language={language}
         setLanguage={setLanguage}
+        onRun={handleRun}
       />
 
       <div style={{ flex: 1, display: "flex" }}>
-        
+
         <div style={{ flex: 3, display: "flex", flexDirection: "column" }}>
-          <CodeEditor
-            code={code}
-            setCode={setCode}
-            language={language}
+          <CodeEditor 
+            code={code} 
+            setCode={setCode} 
           />
 
           <Output output={output} />

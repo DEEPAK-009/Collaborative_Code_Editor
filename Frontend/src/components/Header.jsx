@@ -1,4 +1,4 @@
-const Header = ({ roomId }) => {
+const Header = ({ roomId, language, setLanguage, onRun }) => {
   return (
     <div
       style={{
@@ -7,25 +7,31 @@ const Header = ({ roomId }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 20px",
+        padding: "0 20px"
       }}
     >
-      <div>
-        Room: {roomId}
-      </div>
+      <div>Room: {roomId}</div>
 
       <div>
-        <select>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+        >
           <option value="python">Python</option>
           <option value="javascript">JavaScript</option>
           <option value="cpp">C++</option>
           <option value="java">Java</option>
         </select>
 
-        <button style={{ marginLeft: "10px" }}>
+        <button
+          onClick={onRun}
+          style={{ marginLeft: "10px" }}
+        >
           Run
         </button>
       </div>
     </div>
   );
 };
+
+export default Header;
