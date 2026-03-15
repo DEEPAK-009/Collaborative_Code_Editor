@@ -1,11 +1,11 @@
-import axios from "../utils/axios";
+import API from "./axios";
 
-export const registerUser = (data) => {
-  return axios.post("/auth/signup", data);
+export const signupUser = (data) => {
+  return API.post("/auth/signup", data);
 };
 
 export const loginUser = (data) => {
-  return axios.post("/auth/login", data);
+  return API.post("/auth/login", data);
 };
 
 export const googleLogin = () => {

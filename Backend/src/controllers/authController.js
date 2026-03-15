@@ -67,7 +67,7 @@ const googleCallback = async (req, res) => {
       expiresIn: process.env.JWT_EXPIRES
     }
   );
-  const redirectURL = `http://localhost:3000/oauth-success?token=${token}`;
+  const redirectURL = `http://localhost:5173/oauth-success?token=${token}`;
   res.redirect(redirectURL);
 };
 
