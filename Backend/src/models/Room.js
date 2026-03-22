@@ -5,6 +5,10 @@ const memberSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+
+    username: {
+      type: String, // ✅ NEW FIELD
+    },
   role: {
     type: String,
     enum: ["owner", "editor", "viewer"],

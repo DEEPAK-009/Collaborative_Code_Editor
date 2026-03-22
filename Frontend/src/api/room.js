@@ -1,9 +1,11 @@
 import API from "./axios";
 
-export const createRoom = (ownerId, token) => {
+export const createRoom = (ownerId,username, token) => {
   return API.post(
     "/rooms",
-    { ownerId },
+    { ownerId, 
+      username
+     },
     {
       headers: {
         Authorization: `Bearer ${token}`,

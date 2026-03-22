@@ -1,7 +1,8 @@
 const { v4: uuidv4 } = require("uuid");
 const Room = require("../models/Room");
+const ChatMessage = require("../models/ChatMessage");
 
-const createRoom = async (ownerId) => {
+const createRoom = async (ownerId, username) => {
   const roomId = uuidv4().slice(0, 6);
   const room = new Room({
     roomId,
@@ -9,6 +10,7 @@ const createRoom = async (ownerId) => {
     members: [
       {
         userId: ownerId,
+        username: username || "Anonymous" ,
         role: "owner",
       },
     ],
@@ -18,7 +20,7 @@ const createRoom = async (ownerId) => {
   return room;
 };
 
-const joinRoom = async (roomId, userId) => {
+const joinRoom = async (roomId, userId, username) => {
   const room = await Room.findOne({ roomId });
 
   if (!room) {
@@ -28,26 +30,24 @@ const joinRoom = async (roomId, userId) => {
 
   console.log("Room before update:", room.members);
 
-  const exists = room.members.some(
+  const existingMember = room.members.find(
     (m) => m.userId.toString() === userId.toString()
   );
 
-  if (!exists) {
-    room.members.push({
-      userId,
-      role: "editor"
-    });
-
-    await room.save();
-
-    console.log("User added to room ✅");
-  } else {
-    console.log("User already exists");
-  }
-
-  console.log("Room after update:", room.members);
-
-  return room;
+  if (!existingMember) {
+  room.members.push({
+    userId,
+    username: username || "Anonymous",
+    role: "editor",
+  });
+} else {
+  // ✅ UPDATE username if changed
+  if (username && username.trim() !== "") {
+  existingMember.username = username;
+}
+}
+  await room.save();
+  return room ;
 };
 
 const updateRoomCode = async (roomId, code) => {

@@ -16,10 +16,10 @@ const socketHandler = (io) => {
     const lastCursorUpdate = {};
 
     // JOIN ROOM
-    socket.on("join-room", async ({ roomId }) => {
+    socket.on("join-room", async ({ roomId, username }) => {
       console.log("JOIN EVENT RECEIVED:", roomId);
       const userId = socket.user.id;
-      const room = await roomService.joinRoom(roomId, userId);
+      const room = await roomService.joinRoom(roomId, userId, username);
       if (!room) return;
       socket.join(roomId);
 
@@ -42,6 +42,7 @@ const socketHandler = (io) => {
       if (!exists) {
         rooms[roomId].push({
           userId,
+          username, 
           socketId: socket.id,
           role: member.role,
         });

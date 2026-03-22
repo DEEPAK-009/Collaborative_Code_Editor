@@ -2,9 +2,9 @@ const roomService = require("../services/roomService");
 
 const createRoom = async (req, res) => {
   try {
-    const { ownerId } = req.body;
+    const { ownerId, username } = req.body;
 
-    const room = await roomService.createRoom(ownerId);
+    const room = await roomService.createRoom(ownerId, username);
 
     res.status(201).json({
       roomId: room.roomId,
