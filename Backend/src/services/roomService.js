@@ -20,19 +20,33 @@ const createRoom = async (ownerId) => {
 
 const joinRoom = async (roomId, userId) => {
   const room = await Room.findOne({ roomId });
+
   if (!room) {
-    throw new Error("Room not found");
+    console.log("Room not found");
+    return null;
   }
-  const existingMember = room.members.find(
-    (member) => member.userId === userId,
+
+  console.log("Room before update:", room.members);
+
+  const exists = room.members.some(
+    (m) => m.userId.toString() === userId.toString()
   );
-  if (!existingMember) {
+
+  if (!exists) {
     room.members.push({
       userId,
-      role: "editor",
+      role: "editor"
     });
+
     await room.save();
+
+    console.log("User added to room ✅");
+  } else {
+    console.log("User already exists");
   }
+
+  console.log("Room after update:", room.members);
+
   return room;
 };
 
@@ -127,6 +141,10 @@ const autoTransferOwnership = async (roomId) => {
 
   return newOwner;
 };
+
+const getRoom = async (roomId) => {
+  return await Room.findOne({ roomId });
+};
 module.exports = {
   createRoom,
   joinRoom,
@@ -136,4 +154,5 @@ module.exports = {
   transferOwnership,
   deleteRoom,
   autoTransferOwnership,
+  getRoom
 };

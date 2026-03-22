@@ -12,7 +12,7 @@ import Output from "../components/Output";
 
 const Editor = () => {
   const { roomId } = useParams();
-
+  const [joined, setJoined] = useState(false);
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("python");
   const [output, setOutput] = useState("");
@@ -20,26 +20,31 @@ const Editor = () => {
   const { token } = useContext(AuthContext);
 
   // socket connection
-  useEffect(() => {
-    socket.connect();
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
 
   useEffect(() => {
+  socket.auth = { token };
+
+  if (!socket.connected) {
     socket.connect();
+  }
+
+  const handleConnect = () => {
+    console.log("Connected:", socket.id);
     socket.emit("join-room", { roomId });
+  };
 
-    return () => {
-      socket.disconnect();
-    };
-  }, [roomId]);
+  socket.on("connect", handleConnect);
+
+  return () => {
+    socket.off("connect", handleConnect);
+    // ❌ DO NOT disconnect here
+  };
+}, [roomId, token]);
 
   useEffect(() => {
     socket.on("load-code", ({ code }) => {
       setCode(code);
+      setJoined(true);
     });
 
     socket.on("code-update", ({ code }) => {
@@ -72,7 +77,7 @@ const Editor = () => {
 
       <div style={{ flex: 1, display: "flex" }}>
         <div style={{ flex: 3, display: "flex", flexDirection: "column" }}>
-          <CodeEditor code={code} setCode={setCode} roomId={roomId} />
+          <CodeEditor code={code} setCode={setCode} roomId={roomId} joined={joined}/>
 
           <Output output={output} />
         </div>

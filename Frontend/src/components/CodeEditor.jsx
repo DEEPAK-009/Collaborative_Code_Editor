@@ -1,9 +1,13 @@
-const CodeEditor = ({ code, setCode, roomId }) => {
+import socket from "../socket/socket";
+import { useRef } from "react";
+
+const CodeEditor = ({ code, setCode, roomId , joined}) => {
+
   const handleChange = (e) => {
     const newCode = e.target.value;
 
     setCode(newCode);
-
+    if (!joined) return;
     socket.emit("code-change", {
       roomId,
       code: newCode,

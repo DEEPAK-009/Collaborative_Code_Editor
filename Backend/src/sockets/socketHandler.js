@@ -17,6 +17,7 @@ const socketHandler = (io) => {
 
     // JOIN ROOM
     socket.on("join-room", async ({ roomId }) => {
+      console.log("JOIN EVENT RECEIVED:", roomId);
       const userId = socket.user.id;
       const room = await roomService.joinRoom(roomId, userId);
       if (!room) return;
@@ -59,8 +60,8 @@ const socketHandler = (io) => {
       const userId = socket.user.id;
       if (!isUserInRoom(roomId, userId)) return;
       await roomService.updateRoomCode(roomId, code);
-
-      socket.to(roomId).emit("code-update", { code });
+      console.log("code saved ", code); 
+      io.to(roomId).emit("code-update", { code });
 
       socket.to(roomId).emit("cursor-reset");
     });
