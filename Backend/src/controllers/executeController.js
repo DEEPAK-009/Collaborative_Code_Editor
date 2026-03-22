@@ -1,27 +1,24 @@
 const executionService = require("../services/executionService");
 
 const executeCode = async (req, res) => {
-
   try {
-
-    const { language, code } = req.body;
+    const { language, code, roomId } = req.body;
 
     const output = await executionService.executeCode(language, code);
 
-    res.json({
-      output
+    const io = req.app.get("io"); // ✅ get socket instance
+
+    // 🔥 broadcast to ALL users in room
+    io.to(roomId).emit("execution-result", {
+      output,
     });
 
+    res.json({ output });
   } catch (error) {
-
     res.status(500).json({
-      error: "Execution failed"
+      error: "Execution failed",
     });
-
   }
-
 };
 
-module.exports = {
-  executeCode
-};
+module.exports = { executeCode };

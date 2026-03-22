@@ -57,10 +57,19 @@ const Editor = () => {
     };
   }, []);
 
+  useEffect(() => {
+  socket.on("execution-result", ({ output }) => {
+    setOutput(output);
+  });
+
+  return () => {
+    socket.off("execution-result");
+  };
+}, []);
+
   const handleRun = async () => {
     try {
-      const res = await runCode(language, code, token);
-      setOutput(res.data.output);
+      await runCode(roomId, language, code, token);
     } catch (err) {
       setOutput("Execution failed");
     }

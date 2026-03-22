@@ -19,6 +19,8 @@ const io = new Server(server, {
   },
 });
 
+app.set("io", io);
+
 // 🔐 Socket Authentication Middleware
 io.use((socket, next) => {
   try {

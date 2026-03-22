@@ -1,9 +1,10 @@
 import API from "./axios";
 
-export const runCode = (language, code, token) => {
+export const runCode = (roomId, language, code, token) => {
   return API.post(
     "/execute",
     {
+      roomId, 
       language,
       code
     },
