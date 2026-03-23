@@ -103,7 +103,7 @@
   background: #e3eaf2;
 }
 
-.auth-btn-google {
+/* .auth-btn-google {
   border: 1px solid #d8e0ea;
   background: #ffffff;
   color: #172033;
@@ -111,6 +111,19 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
+} */
+
+.auth-btn-google {
+  border: 1px solid #d8e0ea;
+  background: #ffffff;
+  color: #172033;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  margin: 0 auto;   /* ✅ THIS centers it */
 }
 
 .auth-google-icon {

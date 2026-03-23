@@ -11,6 +11,32 @@
     #f3f6fb;
 }
 
+.icon-button {
+  background-color: #ffe5e5;      /* very light red */
+  border: 1px solid #f5c2c2;      /* soft border */
+  color: #b42323;                 /* muted red text/icon */
+  
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background-color: #f8d7da;      /* slightly deeper on hover */
+  border-color: #e0a1a1;
+  color: #8f1d1d;
+}
+
+.icon-button:active {
+  background-color: #f1bcbc;
+}
+
+.door-icon span {
+  background-color: currentColor;
+}
+
+
 .editor-header,
 .panel,
 .editor-shell {
