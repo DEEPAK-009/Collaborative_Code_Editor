@@ -1,16 +1,18 @@
 const { v4: uuidv4 } = require("uuid");
 const Room = require("../models/Room");
 const ChatMessage = require("../models/ChatMessage");
+const User = require("../models/User");
 
 const createRoom = async (ownerId, username) => {
   const roomId = uuidv4().slice(0, 6);
+  const user = await User.findById(ownerId);
   const room = new Room({
     roomId,
     ownerId,
     members: [
       {
         userId: ownerId,
-        username: username || "Anonymous" ,
+        username: user.username ,
         role: "owner",
       },
     ],
@@ -20,7 +22,9 @@ const createRoom = async (ownerId, username) => {
   return room;
 };
 
-const joinRoom = async (roomId, userId, username) => {
+const joinRoom = async (roomId, userId) => {
+  const user = await User.findById(userId);
+  if (!user) return null;
   const room = await Room.findOne({ roomId });
 
   if (!room) {
@@ -37,14 +41,12 @@ const joinRoom = async (roomId, userId, username) => {
   if (!existingMember) {
   room.members.push({
     userId,
-    username: username || "Anonymous",
+    username: user.username,
     role: "editor",
   });
 } else {
   // ✅ UPDATE username if changed
-  if (username && username.trim() !== "") {
-  existingMember.username = username;
-}
+  existingMember.username = user.username;
 }
   await room.save();
   return room ;

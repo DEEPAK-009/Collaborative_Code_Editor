@@ -125,7 +125,8 @@ const Editor = () => {
   const { roomId } = useParams();
 
   const location = useLocation(); // ✅ ADDED
-  const username = location.state?.username; // ✅ EXTRACT USERNAME
+  const username =
+  location.state?.username || localStorage.getItem("username"); // ✅ EXTRACT USERNAME
 
   const [joined, setJoined] = useState(false);
   const [code, setCode] = useState("");

@@ -14,9 +14,9 @@ export const createRoom = (ownerId,username, token) => {
   );
 };
 
-export const joinRoom = (roomId, userId, token) => {
+export const joinRoom = (roomId, userId,username,  token) => {
   return API.get(`/rooms/${roomId}`, {
-    data: { userId },
+    data: { userId , username},
     headers: {
       Authorization: `Bearer ${token}`,
     },

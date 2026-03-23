@@ -15,9 +15,13 @@ const Dashboard = () => {
   const userId = JSON.parse(atob(token.split(".")[1])).id;
 
   const handleCreateRoom = async () => {
+    if (!username.trim()) {
+      alert("Enter your name");
+      return;
+    }
     try {
       const res = await createRoom(userId, username , token);
-
+      localStorage.setItem("username", username);
       navigate(`/editor/${res.data.roomId}`, {
         state: { username }, // ✅ PASS USERNAME
       });
@@ -27,9 +31,13 @@ const Dashboard = () => {
   };
 
   const handleJoinRoom = async () => {
+    if (!username.trim()) {
+      alert("Enter your name");
+      return;
+    }
     try {
-      await joinRoom(roomCode, userId, token);
-
+      await joinRoom(roomCode, userId,username,  token);
+      localStorage.setItem("username", username);
       navigate(`/editor/${roomCode}`, {
         state: { username }, // ✅ PASS USERNAME
       });
@@ -78,6 +86,7 @@ const Dashboard = () => {
           className="dashboard-input focus-green"
           placeholder="Display Name"
           value={username} // ✅ bind value
+          
           onChange={(e) => setUsername(e.target.value)} // ✅ update username
         />
 

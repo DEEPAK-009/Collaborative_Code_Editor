@@ -18,6 +18,7 @@ const socketHandler = (io) => {
     // JOIN ROOM
     socket.on("join-room", async ({ roomId, username }) => {
       console.log("JOIN EVENT RECEIVED:", roomId);
+      console.log("USERNAME RECEIVED:", username)
       const userId = socket.user.id;
       const room = await roomService.joinRoom(roomId, userId, username);
       if (!room) return;
@@ -42,7 +43,7 @@ const socketHandler = (io) => {
       if (!exists) {
         rooms[roomId].push({
           userId,
-          username, 
+          username,
           socketId: socket.id,
           role: member.role,
         });
@@ -61,7 +62,7 @@ const socketHandler = (io) => {
       const userId = socket.user.id;
       if (!isUserInRoom(roomId, userId)) return;
       await roomService.updateRoomCode(roomId, code);
-      console.log("code saved ", code); 
+      console.log("code saved ", code);
       io.to(roomId).emit("code-update", { code });
 
       socket.to(roomId).emit("cursor-reset");
@@ -70,10 +71,18 @@ const socketHandler = (io) => {
     // CHAT MESSAGE
     socket.on("send-message", async ({ roomId, message }) => {
       const userId = socket.user.id;
+
       if (!isUserInRoom(roomId, userId)) return;
+
+      // ✅ Get user from in-memory room
+      const member = rooms[roomId]?.find((u) => u.userId === userId);
+
+      if (!member) return; // safety check
+
       const savedMessage = await chatService.saveMessage(
         roomId,
         userId,
+        member.username, // ✅ correct source
         message,
       );
 
