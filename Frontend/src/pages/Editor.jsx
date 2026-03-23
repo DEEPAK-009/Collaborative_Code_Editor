@@ -32,6 +32,7 @@ const Editor = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState("");
   const [actionUserId, setActionUserId] = useState(null);
+  const [presenceToasts, setPresenceToasts] = useState([]);
   const [remoteCursors, setRemoteCursors] = useState({});
 
   const hasJoinedRef = useRef(false);
@@ -39,6 +40,9 @@ const Editor = () => {
   const latestCodeRef = useRef("");
   const latestLanguageRef = useRef("javascript");
   const canEditRef = useRef(false);
+  const activeUsersRef = useRef([]);
+  const presenceInitializedRef = useRef(false);
+  const presenceToastTimeoutsRef = useRef([]);
 
   const currentUserId = user?.id;
   const currentMember = useMemo(
@@ -66,6 +70,15 @@ const Editor = () => {
   useEffect(() => {
     canEditRef.current = canEdit;
   }, [canEdit]);
+
+  useEffect(() => {
+    return () => {
+      presenceToastTimeoutsRef.current.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
+      presenceToastTimeoutsRef.current = [];
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,6 +135,23 @@ const Editor = () => {
       socket.emit(eventName, { roomId });
     };
 
+    const pushPresenceToast = (message) => {
+      const id = `${Date.now()}-${Math.random()}`;
+
+      setPresenceToasts((currentToasts) => [...currentToasts, { id, message }]);
+
+      const timeoutId = window.setTimeout(() => {
+        setPresenceToasts((currentToasts) =>
+          currentToasts.filter((toast) => toast.id !== id)
+        );
+        presenceToastTimeoutsRef.current = presenceToastTimeoutsRef.current.filter(
+          (currentTimeoutId) => currentTimeoutId !== timeoutId
+        );
+      }, 1800);
+
+      presenceToastTimeoutsRef.current.push(timeoutId);
+    };
+
     const handleRoomState = ({ room: nextRoom, messages: nextMessages }) => {
       setConnectionStatus("connected");
       setError("");
@@ -129,6 +159,8 @@ const Editor = () => {
       setMessages(nextMessages);
       setCode(nextRoom.code || "");
       setLanguage(nextRoom.language || "javascript");
+      activeUsersRef.current = nextRoom.activeUsers || [];
+      presenceInitializedRef.current = true;
     };
 
     const handleRoomUpdated = (nextRoom) => {
@@ -142,6 +174,39 @@ const Editor = () => {
     };
 
     const handlePresenceUpdated = (activeUsers) => {
+      const previousActiveUsers = activeUsersRef.current;
+
+      if (presenceInitializedRef.current) {
+        const previousUsersById = new Map(
+          previousActiveUsers.map((activeUser) => [activeUser.userId, activeUser])
+        );
+        const nextUsersById = new Map(
+          activeUsers.map((activeUser) => [activeUser.userId, activeUser])
+        );
+
+        activeUsers.forEach((activeUser) => {
+          if (
+            activeUser.userId !== currentUserId &&
+            !previousUsersById.has(activeUser.userId)
+          ) {
+            pushPresenceToast(`${activeUser.displayName} joined`);
+          }
+        });
+
+        previousActiveUsers.forEach((activeUser) => {
+          if (
+            activeUser.userId !== currentUserId &&
+            !nextUsersById.has(activeUser.userId)
+          ) {
+            pushPresenceToast(`${activeUser.displayName} left`);
+          }
+        });
+      } else {
+        presenceInitializedRef.current = true;
+      }
+
+      activeUsersRef.current = activeUsers;
+
       setRoom((currentRoom) => {
         if (!currentRoom) {
           return currentRoom;
@@ -274,6 +339,8 @@ const Editor = () => {
       socket.off("room-error", handleRoomError);
       socket.disconnect();
       hasJoinedRef.current = false;
+      presenceInitializedRef.current = false;
+      activeUsersRef.current = [];
     };
   }, [currentUserId, navigate, roomId, token]);
 
@@ -429,6 +496,16 @@ const Editor = () => {
 
   return (
     <div className="editor-page">
+      {presenceToasts.length > 0 ? (
+        <div className="presence-toast-stack">
+          {presenceToasts.map((toast) => (
+            <div key={toast.id} className="presence-toast">
+              {toast.message}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       <Header
         canEdit={canEdit}
         connectionStatus={connectionStatus}

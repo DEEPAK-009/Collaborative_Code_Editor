@@ -2,10 +2,7 @@ const Output = ({ isRunning, output }) => {
   return (
     <section className="panel output-panel">
       <div className="panel-header">
-        <div>
-          <p className="panel-kicker">Execution</p>
-          <h3>Runtime output</h3>
-        </div>
+        <h3>Output</h3>
         <span className={`status-pill ${isRunning ? "running" : "idle"}`}>
           {isRunning ? "Running" : "Ready"}
         </span>

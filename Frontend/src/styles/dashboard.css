@@ -39,8 +39,10 @@
 }
 
 .dashboard-topbar-actions {
+  margin-left: auto;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -184,8 +186,8 @@
 
 .danger-button {
   padding: 0 16px;
-  background: #fee2e2;
-  color: #991b1b;
+  background: #dc2626;
+  color: #ffffff;
 }
 
 .dashboard-error,

@@ -39,9 +39,6 @@ const CodeEditor = ({
         range: new monacoRef.current.Range(lineNumber, column, lineNumber, endColumn),
         options: {
           className: CURSOR_CLASSES[index % CURSOR_CLASSES.length],
-          hoverMessage: {
-            value: cursor.displayName,
-          },
         },
       };
     });

@@ -383,6 +383,29 @@
   font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
 }
 
+.presence-toast-stack {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  z-index: 20;
+  display: grid;
+  gap: 8px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.presence-toast {
+  min-width: 180px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid #d8e0ea;
+  background: rgba(255, 255, 255, 0.96);
+  color: #172033;
+  text-align: center;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(10px);
+}
+
 .editor-toast {
   position: fixed;
   right: 18px;
