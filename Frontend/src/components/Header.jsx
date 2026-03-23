@@ -1,36 +1,55 @@
-const Header = ({ roomId, language, setLanguage, onRun }) => {
+const Header = ({
+  canEdit,
+  connectionStatus,
+  isRunning,
+  language,
+  onCopyRoom,
+  onLeave,
+  onRun,
+  roomId,
+  setLanguage,
+  userRole,
+}) => {
   return (
-    <div
-      style={{
-        height: "60px",
-        borderBottom: "1px solid gray",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 20px"
-      }}
-    >
-      <div>Room: {roomId}</div>
+    <header className="editor-header">
+      <div className="editor-header__identity">
+        <div>
+          <p className="panel-kicker">Workspace</p>
+          <h1>{roomId}</h1>
+        </div>
+        <div className="editor-header__meta">
+          <span className={`status-pill ${connectionStatus}`}>
+            {connectionStatus}
+          </span>
+          <span className={`role-pill role-${userRole || "viewer"}`}>
+            {userRole || "viewer"}
+          </span>
+        </div>
+      </div>
 
-      <div>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-        >
+      <div className="editor-header__actions">
+        <button type="button" className="ghost-button" onClick={onCopyRoom}>
+          Copy room ID
+        </button>
+
+        <select value={language} onChange={(event) => setLanguage(event.target.value)}>
           <option value="python">Python</option>
           <option value="javascript">JavaScript</option>
           <option value="cpp">C++</option>
           <option value="java">Java</option>
+          <option value="go">Go</option>
+          <option value="rust">Rust</option>
         </select>
 
-        <button
-          onClick={onRun}
-          style={{ marginLeft: "10px" }}
-        >
-          Run
+        <button type="button" onClick={onRun} disabled={isRunning || !canEdit}>
+          {isRunning ? "Running..." : "Run code"}
+        </button>
+
+        <button type="button" className="danger-button" onClick={onLeave}>
+          Sign out
         </button>
       </div>
-    </div>
+    </header>
   );
 };
 

@@ -1,17 +1,12 @@
 import API from "./axios";
 
-export const runCode = (roomId, language, code, token) => {
+export const runCode = (roomId, language, code) => {
   return API.post(
     "/execute",
     {
-      roomId, 
+      roomId,
       language,
       code
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
     }
-  );
+  ).then((response) => response.data);
 };

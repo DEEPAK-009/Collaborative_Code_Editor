@@ -1,12 +1,16 @@
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 
 const ProtectedRoute = ({ children }) => {
-  const { token } = useContext(AuthContext);
+  const { isAuthReady, token } = useContext(AuthContext);
+
+  if (!isAuthReady) {
+    return <div className="route-shell">Restoring session...</div>;
+  }
 
   if (!token) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;

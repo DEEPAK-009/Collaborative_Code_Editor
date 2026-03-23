@@ -7,9 +7,10 @@ const authenticateUser = require("../middleware/authMiddleware");
 router.use(authenticateUser);
 
 router.post("/rooms", roomController.createRoom);
-router.get("/rooms/:roomId", roomController.joinRoom);
-router.patch("/rooms/change-role", roomController.changeRole);
-router.patch("/rooms/remove-user", roomController.removeUserFromRoom);
-router.patch("/rooms/transfer-ownership", roomController.transferOwnershipController);
+router.get("/rooms/:roomId", roomController.getRoom);
+router.post("/rooms/:roomId/join", roomController.joinRoom);
+router.patch("/rooms/:roomId/members/:userId/role", roomController.changeRole);
+router.delete("/rooms/:roomId/members/:userId", roomController.removeUserFromRoom);
+router.post("/rooms/:roomId/transfer-ownership", roomController.transferOwnershipController);
 
 module.exports = router;

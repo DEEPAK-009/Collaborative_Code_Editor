@@ -10,7 +10,7 @@ const chatMessageSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    username: {   
+    displayName: {
       type: String,
       required: true
     },

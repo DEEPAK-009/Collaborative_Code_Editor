@@ -33,27 +33,27 @@ const runCode = (language, code) => {
     -w /app \
     ${config.image} sh -c "${config.run}"`;
 
-    console.log("Running command:", dockerCommand);
-    console.log(`Executing ${language} code in container`);
+    exec(
+      dockerCommand,
+      { timeout: 5000, maxBuffer: 1024 * 1024 },
+      (error, stdout, stderr) => {
+        fs.rmSync(dirPath, { recursive: true, force: true });
 
-    exec(dockerCommand, { timeout: 5000 }, (error, stdout, stderr) => {
-      console.log("STDOUT:", stdout);
-      console.log("STDERR:", stderr);
-      fs.rmSync(dirPath, { recursive: true, force: true });
+        if (error) {
+          if (error.killed) {
+            return resolve("Execution timed out");
+          }
 
-      if (error) {
-        if (error.killed) {
-          return resolve("Execution timed out");
+          return resolve(stderr || error.message);
         }
-        return resolve(stderr || error.message);
-      }
 
-      // if program produced error output
-      if (stderr) {
-        return resolve(stderr);
+        if (stderr) {
+          return resolve(stderr);
+        }
+
+        resolve(stdout || "Program finished with no output.");
       }
-      resolve(stdout);
-    });
+    );
   });
 };
 

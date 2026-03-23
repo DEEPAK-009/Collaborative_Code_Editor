@@ -102,21 +102,30 @@
 
 // export default Register;
 
-import { useState, useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { signupUser, googleLogin } from "../api/auth";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 import { useNavigate, Link } from "react-router-dom";
 import "../styles/auth.css";
 
 const Register = () => {
   const [formData, setFormData] = useState({
+    displayName: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login } = useContext(AuthContext);
+  const { login, token } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate, token]);
 
   const handleChange = (e) => {
     setFormData({
@@ -127,31 +136,53 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      const res = await signupUser({
+      const response = await signupUser({
+        displayName: formData.displayName,
         email: formData.email,
         password: formData.password,
       });
 
-      login(res.data.token);
+      login(response.token, response.user);
       navigate("/dashboard");
-    } catch (err) {
-      alert(err.response?.data?.error);
+    } catch (requestError) {
+      setError(requestError.error || "Unable to create the account.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="auth-page-wrapper">
       <div className="auth-card">
-        <h2 className="auth-title">Sign<span>up</span></h2>
+        <div className="auth-copy">
+          <p className="auth-eyebrow">Realtime development workspace</p>
+          <h2 className="auth-title">
+            Sign<span>up</span>
+          </h2>
+          <p className="auth-subtitle">
+            Create a shared identity for your rooms. Google sign-in stays linked
+            to the same account if you use the same email.
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
+          <input
+            name="displayName"
+            placeholder="Display name"
+            onChange={handleChange}
+            className="auth-input"
+          />
+
           <input
             name="email"
             placeholder="developer@email.com"
@@ -175,8 +206,10 @@ const Register = () => {
             className="auth-input"
           />
 
-          <button type="submit" className="auth-btn-primary">
-            Create Workspace
+          {error ? <div className="auth-error">{error}</div> : null}
+
+          <button type="submit" className="auth-btn-primary" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create Workspace"}
           </button>
         </form>
 
@@ -185,7 +218,7 @@ const Register = () => {
         </div>
 
         <button onClick={googleLogin} className="auth-btn-google">
-           <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <svg className="auth-google-icon" viewBox="0 0 24 24">
             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />

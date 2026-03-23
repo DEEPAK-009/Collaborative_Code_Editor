@@ -1,49 +1,71 @@
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { getDisplayName, signAuthToken } = require("../utils/jwt");
 
-const signupUser = async (email, password) => {
-  const existingUser = await User.findOne({ email });
+const sanitizeUser = (user) => ({
+  id: user._id.toString(),
+  email: user.email,
+  displayName: getDisplayName(user),
+  googleId: user.googleId,
+  authProviders: user.authProviders,
+});
 
-  // CASE 1: user already exists
+const normalizeEmail = (email) => email.trim().toLowerCase();
+
+const ensureDisplayName = (displayName, email) => {
+  const normalized = displayName?.trim();
+
+  if (normalized) {
+    return normalized;
+  }
+
+  return email.split("@")[0];
+};
+
+const signupUser = async ({ email, password, displayName }) => {
+  const normalizedEmail = normalizeEmail(email);
+  const existingUser = await User.findOne({ email: normalizedEmail });
+
   if (existingUser) {
-    // If account created with Google only
-    if (!existingUser.password) {
-      throw new Error(
-        "Account exists with Google login. Please login with Google or set a password."
-      );
+    if (existingUser.authProviders.includes("local")) {
+      throw new Error("Email already registered");
     }
 
-    throw new Error("Email already registered");
+    existingUser.password = await bcrypt.hash(password, 10);
+    existingUser.displayName = ensureDisplayName(
+      displayName,
+      existingUser.email
+    );
+    existingUser.authProviders = Array.from(
+      new Set([...existingUser.authProviders, "local"])
+    );
+    await existingUser.save();
+
+    return {
+      user: sanitizeUser(existingUser),
+      token: signAuthToken(existingUser),
+    };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = new User({
-    email,
+    email: normalizedEmail,
+    displayName: ensureDisplayName(displayName, normalizedEmail),
     password: hashedPassword,
     authProviders: ["local"],
   });
 
   await user.save();
 
-  // Generate JWT token
-  const token = jwt.sign(
-    {
-      id: user._id,
-      email: user.email,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES,
-    }
-  );
-
-  return { user, token };
+  return {
+    user: sanitizeUser(user),
+    token: signAuthToken(user),
+  };
 };
 
-const loginUser = async (email, password) => {
-  const user = await User.findOne({ email });
+const loginUser = async ({ email, password }) => {
+  const user = await User.findOne({ email: normalizeEmail(email) });
 
   if (!user) {
     throw new Error("Invalid email or password");
@@ -59,21 +81,55 @@ const loginUser = async (email, password) => {
     throw new Error("Invalid email or password");
   }
 
-  const token = jwt.sign(
-    {
-      id: user._id,
-      email: user.email,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES,
-    }
-  );
+  return {
+    user: sanitizeUser(user),
+    token: signAuthToken(user),
+  };
+};
 
-  return { user, token };
+const getCurrentUser = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return sanitizeUser(user);
+};
+
+const updateCurrentUser = async ({ userId, displayName, password }) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const updates = {};
+
+  if (displayName !== undefined) {
+    updates.displayName = ensureDisplayName(displayName, user.email);
+  }
+
+  if (password) {
+    updates.password = await bcrypt.hash(password, 10);
+    updates.authProviders = Array.from(
+      new Set([...(user.authProviders || []), "local"])
+    );
+  }
+
+  Object.assign(user, updates);
+  await user.save();
+
+  return {
+    user: sanitizeUser(user),
+    token: signAuthToken(user),
+  };
 };
 
 module.exports = {
+  getCurrentUser,
   signupUser,
   loginUser,
+  sanitizeUser,
+  updateCurrentUser,
 };

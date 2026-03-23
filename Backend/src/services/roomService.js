@@ -1,101 +1,223 @@
-const { v4: uuidv4 } = require("uuid");
+const crypto = require("crypto");
 const Room = require("../models/Room");
 const ChatMessage = require("../models/ChatMessage");
 const User = require("../models/User");
+const { getDisplayName } = require("../utils/jwt");
 
-const createRoom = async (ownerId, username) => {
-  const roomId = uuidv4().slice(0, 6);
-  const user = await User.findById(ownerId);
+const ROOM_ID_LENGTH = 6;
+const ROOM_ID_CHARSET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const ROLE_ORDER = {
+  owner: 0,
+  editor: 1,
+  viewer: 2,
+};
+
+const createRoomId = () =>
+  Array.from(crypto.randomBytes(ROOM_ID_LENGTH))
+    .map((value) => ROOM_ID_CHARSET[value % ROOM_ID_CHARSET.length])
+    .join("");
+
+const findUserOrThrow = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};
+
+const findRoomOrThrow = async (roomId) => {
+  const room = await Room.findOne({ roomId });
+
+  if (!room) {
+    throw new Error("Room not found");
+  }
+
+  return room;
+};
+
+const findMember = (room, userId) =>
+  room.members.find((member) => member.userId === userId);
+
+const ensureOwner = (room, actorId) => {
+  if (room.ownerId !== actorId) {
+    throw new Error("Only the room owner can perform this action");
+  }
+};
+
+const pickNextOwner = (room) => {
+  const editors = room.members.filter((member) => member.role === "editor");
+  const viewers = room.members.filter((member) => member.role === "viewer");
+
+  return editors[0] || viewers[0] || null;
+};
+
+const serializeRoom = (room, activeUsers = []) => {
+  const activeUserIds = new Set(activeUsers.map((activeUser) => activeUser.userId));
+
+  return {
+    id: room._id.toString(),
+    roomId: room.roomId,
+    ownerId: room.ownerId,
+    language: room.language || "javascript",
+    code: room.code || "",
+    createdAt: room.createdAt,
+    updatedAt: room.updatedAt,
+    members: [...room.members]
+      .map((member) => ({
+        userId: member.userId,
+        displayName: member.displayName,
+        role: member.role,
+        isActive: activeUserIds.has(member.userId),
+      }))
+      .sort((left, right) => {
+        if (ROLE_ORDER[left.role] !== ROLE_ORDER[right.role]) {
+          return ROLE_ORDER[left.role] - ROLE_ORDER[right.role];
+        }
+
+        return left.displayName.localeCompare(right.displayName);
+      }),
+    activeUsers,
+  };
+};
+
+const createRoom = async (ownerId) => {
+  const user = await findUserOrThrow(ownerId);
+
+  let roomId = createRoomId();
+
+  while (await Room.exists({ roomId })) {
+    roomId = createRoomId();
+  }
+
   const room = new Room({
     roomId,
     ownerId,
     members: [
       {
         userId: ownerId,
-        username: user.username ,
+        displayName: getDisplayName(user),
         role: "owner",
       },
     ],
     code: "",
+    language: "javascript",
   });
+
   await room.save();
+
   return room;
 };
 
 const joinRoom = async (roomId, userId) => {
-  const user = await User.findById(userId);
-  if (!user) return null;
-  const room = await Room.findOne({ roomId });
+  const user = await findUserOrThrow(userId);
+  const room = await findRoomOrThrow(roomId);
 
-  if (!room) {
-    console.log("Room not found");
-    return null;
-  }
-
-  console.log("Room before update:", room.members);
-
-  const existingMember = room.members.find(
-    (m) => m.userId.toString() === userId.toString()
-  );
+  const displayName = getDisplayName(user);
+  const existingMember = findMember(room, userId);
 
   if (!existingMember) {
-  room.members.push({
-    userId,
-    username: user.username,
-    role: "editor",
-  });
-} else {
-  // ✅ UPDATE username if changed
-  existingMember.username = user.username;
-}
-  await room.save();
-  return room ;
-};
+    room.members.push({
+      userId,
+      displayName,
+      role: "editor",
+    });
+  } else {
+    existingMember.displayName = displayName;
+  }
 
-const updateRoomCode = async (roomId, code) => {
-  const room = await Room.findOneAndUpdate({ roomId }, { code }, { new: true });
+  await room.save();
   return room;
 };
 
-const changeUserRole = async (roomId, targetUserId, newRole) => {
-  const room = await Room.findOne({ roomId });
+const getRoom = async (roomId) => Room.findOne({ roomId });
 
-  if (!room) throw new Error("Room not found");
+const assertRoomMember = async (roomId, userId) => {
+  const room = await findRoomOrThrow(roomId);
+  const member = findMember(room, userId);
 
-  const member = room.members.find((m) => m.userId === targetUserId);
+  if (!member) {
+    throw new Error("You are not a member of this room");
+  }
 
-  if (!member) throw new Error("User not in room");
+  return { room, member };
+};
+
+const updateRoomCode = async (roomId, code, language) => {
+  const updates = {
+    code,
+  };
+
+  if (language) {
+    updates.language = language;
+  }
+
+  const room = await Room.findOneAndUpdate({ roomId }, updates, { new: true });
+  return room;
+};
+
+const changeUserRole = async ({ roomId, actorId, targetUserId, newRole }) => {
+  if (!["editor", "viewer"].includes(newRole)) {
+    throw new Error("Invalid role");
+  }
+
+  const room = await findRoomOrThrow(roomId);
+  ensureOwner(room, actorId);
+
+  if (room.ownerId === targetUserId) {
+    throw new Error("Transfer ownership before changing the owner's role");
+  }
+
+  const member = findMember(room, targetUserId);
+
+  if (!member) {
+    throw new Error("User not in room");
+  }
 
   member.role = newRole;
 
   await room.save();
-
   return room;
 };
 
-const removeUser = async (roomId, userId) => {
-  const room = await Room.findOne({ roomId });
+const removeUser = async ({ roomId, actorId, targetUserId }) => {
+  const room = await findRoomOrThrow(roomId);
+  ensureOwner(room, actorId);
 
-  if (!room) throw new Error("Room not found");
+  if (room.ownerId === targetUserId) {
+    throw new Error("Transfer ownership before removing the owner");
+  }
 
-  room.members = room.members.filter((member) => member.userId !== userId);
+  const member = findMember(room, targetUserId);
+
+  if (!member) {
+    throw new Error("User not in room");
+  }
+
+  room.members = room.members.filter((item) => item.userId !== targetUserId);
 
   await room.save();
 
   return room;
 };
 
-const transferOwnership = async (roomId, newOwnerId) => {
-  const room = await Room.findOne({ roomId });
+const transferOwnership = async ({ roomId, actorId, newOwnerId }) => {
+  const room = await findRoomOrThrow(roomId);
+  ensureOwner(room, actorId);
 
-  if (!room) throw new Error("Room not found");
+  const newOwner = findMember(room, newOwnerId);
+
+  if (!newOwner) {
+    throw new Error("User not in room");
+  }
 
   room.ownerId = newOwnerId;
 
   room.members.forEach((member) => {
     if (member.userId === newOwnerId) {
       member.role = "owner";
-    } else if (member.role === "owner") {
+    } else if (member.userId === actorId) {
       member.role = "editor";
     }
   });
@@ -110,51 +232,79 @@ const deleteRoom = async (roomId) => {
   await ChatMessage.deleteMany({ roomId });
 };
 
-const autoTransferOwnership = async (roomId) => {
-  const room = await Room.findOne({ roomId });
+const leaveRoom = async (roomId, userId) => {
+  const room = await findRoomOrThrow(roomId);
+  const leavingMember = findMember(room, userId);
 
-  if (!room) return null;
-
-  const editors = room.members.filter((m) => m.role === "editor");
-
-  const viewers = room.members.filter((m) => m.role === "viewer");
-
-  let newOwner = null;
-
-  if (editors.length > 0) {
-    newOwner = editors[0];
-  } else if (viewers.length > 0) {
-    newOwner = viewers[0];
+  if (!leavingMember) {
+    return {
+      deleted: false,
+      ownershipTransferredTo: null,
+      room,
+    };
   }
 
-  if (!newOwner) return null;
+  const wasOwner = room.ownerId === userId;
 
-  room.ownerId = newOwner.userId;
+  room.members = room.members.filter((member) => member.userId !== userId);
 
-  room.members.forEach((member) => {
-    if (member.userId === newOwner.userId) {
-      member.role = "owner";
-    } else if (member.role === "owner") {
-      member.role = "editor";
+  if (room.members.length === 0) {
+    await deleteRoom(roomId);
+    return {
+      deleted: true,
+      ownershipTransferredTo: null,
+      room: null,
+    };
+  }
+
+  let ownershipTransferredTo = null;
+
+  if (wasOwner) {
+    const newOwner = pickNextOwner(room);
+
+    if (!newOwner) {
+      await deleteRoom(roomId);
+      return {
+        deleted: true,
+        ownershipTransferredTo: null,
+        room: null,
+      };
     }
-  });
+
+    ownershipTransferredTo = {
+      userId: newOwner.userId,
+      displayName: newOwner.displayName,
+      role: "owner",
+    };
+
+    room.ownerId = newOwner.userId;
+
+    room.members.forEach((member) => {
+      if (member.userId === newOwner.userId) {
+        member.role = "owner";
+      }
+    });
+  }
 
   await room.save();
 
-  return newOwner;
+  return {
+    deleted: false,
+    ownershipTransferredTo,
+    room,
+  };
 };
 
-const getRoom = async (roomId) => {
-  return await Room.findOne({ roomId });
-};
 module.exports = {
+  assertRoomMember,
   createRoom,
-  joinRoom,
-  updateRoomCode,
   changeUserRole,
-  removeUser,
-  transferOwnership,
   deleteRoom,
-  autoTransferOwnership,
-  getRoom
+  getRoom,
+  joinRoom,
+  leaveRoom,
+  removeUser,
+  serializeRoom,
+  transferOwnership,
+  updateRoomCode,
 };

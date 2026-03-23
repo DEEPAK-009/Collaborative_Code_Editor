@@ -5,16 +5,17 @@ const memberSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-
-    username: {
-      type: String, // ✅ NEW FIELD
-    },
+  displayName: {
+    type: String,
+    required: true,
+    trim: true
+  },
   role: {
     type: String,
     enum: ["owner", "editor", "viewer"],
     default: "editor"
   }
-});
+}, { _id: false });
 
 const roomSchema = new mongoose.Schema({
   roomId: {
@@ -33,6 +34,11 @@ const roomSchema = new mongoose.Schema({
   code: {
     type: String,
     default: ""
+  },
+
+  language: {
+    type: String,
+    default: "javascript"
   }
 
 }, { timestamps: true });

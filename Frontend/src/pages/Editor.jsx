@@ -1,228 +1,437 @@
-// import { useParams } from "react-router-dom";
-// import { useState, useContext, useEffect } from "react";
-// import { runCode } from "../api/execute";
-// import { AuthContext } from "../context/AuthContext";
-// import { useLocation } from "react-router-dom";
-
-// import socket from "../socket/socket";
-// import Header from "../components/Header";
-// import CodeEditor from "../components/CodeEditor";
-// import Chat from "../components/Chat";
-// import Participants from "../components/Participants";
-// import Output from "../components/Output";
-
-// const Editor = () => {
-//   const { roomId } = useParams();
-//   const [joined, setJoined] = useState(false);
-//   const [code, setCode] = useState("");
-//   const [language, setLanguage] = useState("python");
-//   const [output, setOutput] = useState("");
-
-//   const { token } = useContext(AuthContext);
-
-//   // socket connection
-
-//   useEffect(() => {
-//   socket.auth = { token };
-
-//   if (!socket.connected) {
-//     socket.connect();
-//   }
-
-//   const handleConnect = () => {
-//     console.log("Connected:", socket.id);
-//     socket.emit("join-room", { roomId });
-//   };
-
-//   socket.on("connect", handleConnect);
-
-//   return () => {
-//     socket.off("connect", handleConnect);
-//     // ❌ DO NOT disconnect here
-//   };
-// }, [roomId, token]);
-
-//   useEffect(() => {
-//     socket.on("load-code", ({ code }) => {
-//       setCode(code);
-//       setJoined(true);
-//     });
-
-//     socket.on("code-update", ({ code }) => {
-//       setCode(code);
-//     });
-
-//     return () => {
-//       socket.off("load-code");
-//       socket.off("code-update");
-//     };
-//   }, []);
-
-//   useEffect(() => {
-//   socket.on("execution-result", ({ output }) => {
-//     setOutput(output);
-//   });
-
-//   return () => {
-//     socket.off("execution-result");
-//   };
-// }, []);
-
-//   const handleRun = async () => {
-//     try {
-//       await runCode(roomId, language, code, token);
-//     } catch (err) {
-//       setOutput("Execution failed");
-//     }
-//   };
-
-//   return (
-//     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-//       <Header
-//         roomId={roomId}
-//         language={language}
-//         setLanguage={setLanguage}
-//         onRun={handleRun}
-//       />
-
-//       <div style={{ flex: 1, display: "flex" }}>
-//         <div style={{ flex: 3, display: "flex", flexDirection: "column" }}>
-//           <CodeEditor code={code} setCode={setCode} roomId={roomId} joined={joined}/>
-
-//           <Output output={output} />
-//         </div>
-
-//         <div style={{ flex: 1 }}>
-//           <Chat roomId={roomId} />
-//         </div>
-
-//         <div style={{ width: "250px" }}>
-//           <Participants roomId={roomId} />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Editor;
-
-
-
-import { useParams } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { runCode } from "../api/execute";
-import { AuthContext } from "../context/AuthContext";
-import { useLocation } from "react-router-dom"; // ✅ ADDED
-
+import {
+  changeRoomRole,
+  joinRoom,
+  removeRoomUser,
+  transferRoomOwnership,
+} from "../api/room";
+import { AuthContext } from "../context/auth-context";
 import socket from "../socket/socket";
 import Header from "../components/Header";
 import CodeEditor from "../components/CodeEditor";
 import Chat from "../components/Chat";
 import Participants from "../components/Participants";
 import Output from "../components/Output";
+import "../styles/editor.css";
 
 const Editor = () => {
   const { roomId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { logout, token, user } = useContext(AuthContext);
 
-  const location = useLocation(); // ✅ ADDED
-  const username =
-  location.state?.username || localStorage.getItem("username"); // ✅ EXTRACT USERNAME
-
-  const [joined, setJoined] = useState(false);
+  const [room, setRoom] = useState(location.state?.initialRoom || null);
+  const [messages, setMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
   const [code, setCode] = useState("");
-  const [language, setLanguage] = useState("python");
+  const [language, setLanguage] = useState("javascript");
   const [output, setOutput] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState("connecting");
+  const [isRunning, setIsRunning] = useState(false);
+  const [error, setError] = useState("");
+  const [actionUserId, setActionUserId] = useState(null);
+  const [remoteCursors, setRemoteCursors] = useState({});
 
-  const { token } = useContext(AuthContext);
+  const hasJoinedRef = useRef(false);
+  const codeSyncTimeoutRef = useRef(null);
+  const latestCodeRef = useRef("");
 
-  // socket connection
+  const currentUserId = user?.id;
+  const currentMember = useMemo(
+    () => room?.members.find((member) => member.userId === currentUserId),
+    [currentUserId, room]
+  );
+  const canEdit = ["owner", "editor"].includes(currentMember?.role || "");
+  const isOwner = currentMember?.role === "owner";
+  const activeCursors = useMemo(
+    () =>
+      Object.values(remoteCursors).filter(
+        (cursor) => cursor.userId !== currentUserId
+      ),
+    [currentUserId, remoteCursors]
+  );
+
   useEffect(() => {
-    socket.auth = { token };
+    latestCodeRef.current = code;
+  }, [code]);
 
-    if (!socket.connected) {
-      socket.connect();
+  useEffect(() => {
+    let cancelled = false;
+
+    const initializeRoom = async () => {
+      try {
+        const response = await joinRoom(roomId);
+
+        if (cancelled) {
+          return;
+        }
+
+        setRoom(response.room);
+        setCode(response.room.code || "");
+        setLanguage(response.room.language || "javascript");
+        localStorage.setItem("activeRoomId", roomId);
+      } catch (requestError) {
+        if (cancelled) {
+          return;
+        }
+
+        navigate("/dashboard", {
+          replace: true,
+          state: {
+            error: requestError.message || requestError.error || "Unable to open the room.",
+          },
+        });
+      }
+    };
+
+    initializeRoom();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, roomId]);
+
+  useEffect(() => {
+    if (!token) {
+      return undefined;
     }
 
-    const handleConnect = () => {
-      console.log("Connected:", socket.id);
+    socket.auth = { token };
 
-      socket.emit("join-room", {
-        roomId,
-        username, // ✅ SEND USERNAME
+    const emitJoinEvent = () => {
+      const eventName = hasJoinedRef.current ? "rejoin-room" : "join-room";
+      hasJoinedRef.current = true;
+      socket.emit(eventName, { roomId });
+    };
+
+    const handleRoomState = ({ room: nextRoom, messages: nextMessages }) => {
+      setConnectionStatus("connected");
+      setError("");
+      setRoom(nextRoom);
+      setMessages(nextMessages);
+      setCode(nextRoom.code || "");
+      setLanguage(nextRoom.language || "javascript");
+    };
+
+    const handleRoomUpdated = (nextRoom) => {
+      setRoom(nextRoom);
+      setLanguage(nextRoom.language || "javascript");
+
+      if (!nextRoom.members.some((member) => member.userId === currentUserId)) {
+        navigate("/dashboard", { replace: true });
+      }
+    };
+
+    const handlePresenceUpdated = (activeUsers) => {
+      setRoom((currentRoom) => {
+        if (!currentRoom) {
+          return currentRoom;
+        }
+
+        const activeUserIds = new Set(activeUsers.map((activeUser) => activeUser.userId));
+
+        return {
+          ...currentRoom,
+          activeUsers,
+          members: currentRoom.members.map((member) => ({
+            ...member,
+            isActive: activeUserIds.has(member.userId),
+          })),
+        };
+      });
+
+      setRemoteCursors((currentCursors) =>
+        Object.fromEntries(
+          Object.entries(currentCursors).filter(([userId]) =>
+            activeUsers.some((activeUser) => activeUser.userId === userId)
+          )
+        )
+      );
+    };
+
+    const handleCodeUpdate = ({ code: nextCode, language: nextLanguage, updatedBy }) => {
+      if (updatedBy === currentUserId) {
+        return;
+      }
+
+      setCode(nextCode);
+
+      if (nextLanguage) {
+        setLanguage(nextLanguage);
+      }
+    };
+
+    const handleReceiveMessage = (message) => {
+      setMessages((currentMessages) => [...currentMessages, message]);
+    };
+
+    const handleExecutionResult = ({ output: nextOutput }) => {
+      setOutput(nextOutput);
+      setIsRunning(false);
+    };
+
+    const handleCursorUpdate = (cursor) => {
+      setRemoteCursors((currentCursors) => ({
+        ...currentCursors,
+        [cursor.userId]: cursor,
+      }));
+    };
+
+    const handleCursorRemove = ({ userId }) => {
+      setRemoteCursors((currentCursors) => {
+        const nextCursors = { ...currentCursors };
+        delete nextCursors[userId];
+        return nextCursors;
       });
     };
 
+    const handleRemovedFromRoom = () => {
+      navigate("/dashboard", { replace: true });
+    };
+
+    const handleRoomClosed = () => {
+      navigate("/dashboard", { replace: true });
+    };
+
+    const handleRoomError = ({ message }) => {
+      setError(message);
+    };
+
+    const handleDisconnect = () => {
+      setConnectionStatus("reconnecting");
+    };
+
+    const handleConnect = () => {
+      setConnectionStatus("connected");
+      emitJoinEvent();
+    };
+
     socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("room-state", handleRoomState);
+    socket.on("room-updated", handleRoomUpdated);
+    socket.on("presence-updated", handlePresenceUpdated);
+    socket.on("code-update", handleCodeUpdate);
+    socket.on("receive-message", handleReceiveMessage);
+    socket.on("execution-result", handleExecutionResult);
+    socket.on("cursor_update", handleCursorUpdate);
+    socket.on("cursor-remove", handleCursorRemove);
+    socket.on("removed-from-room", handleRemovedFromRoom);
+    socket.on("room-closed", handleRoomClosed);
+    socket.on("room-error", handleRoomError);
+
+    if (!socket.connected) {
+      socket.connect();
+    } else {
+      handleConnect();
+    }
 
     return () => {
+      if (codeSyncTimeoutRef.current) {
+        clearTimeout(codeSyncTimeoutRef.current);
+      }
+
+      socket.emit("leave-room", { roomId });
       socket.off("connect", handleConnect);
-      // ❌ DO NOT disconnect here
+      socket.off("disconnect", handleDisconnect);
+      socket.off("room-state", handleRoomState);
+      socket.off("room-updated", handleRoomUpdated);
+      socket.off("presence-updated", handlePresenceUpdated);
+      socket.off("code-update", handleCodeUpdate);
+      socket.off("receive-message", handleReceiveMessage);
+      socket.off("execution-result", handleExecutionResult);
+      socket.off("cursor_update", handleCursorUpdate);
+      socket.off("cursor-remove", handleCursorRemove);
+      socket.off("removed-from-room", handleRemovedFromRoom);
+      socket.off("room-closed", handleRoomClosed);
+      socket.off("room-error", handleRoomError);
+      socket.disconnect();
+      hasJoinedRef.current = false;
+      localStorage.removeItem("activeRoomId");
     };
-  }, [roomId, token, username]); // ✅ added username dependency
+  }, [currentUserId, navigate, roomId, token]);
 
-  useEffect(() => {
-    socket.on("load-code", ({ code }) => {
-      setCode(code);
-      setJoined(true);
-    });
+  const scheduleCodeSync = (nextCode, nextLanguage = language) => {
+    if (!canEdit) {
+      return;
+    }
 
-    socket.on("code-update", ({ code }) => {
-      setCode(code);
-    });
+    if (codeSyncTimeoutRef.current) {
+      clearTimeout(codeSyncTimeoutRef.current);
+    }
 
-    return () => {
-      socket.off("load-code");
-      socket.off("code-update");
-    };
-  }, []);
+    codeSyncTimeoutRef.current = setTimeout(() => {
+      if (!socket.connected) {
+        return;
+      }
 
-  useEffect(() => {
-    socket.on("execution-result", ({ output }) => {
-      setOutput(output);
-    });
+      socket.emit("code-change", {
+        roomId,
+        code: nextCode,
+        language: nextLanguage,
+      });
+    }, 120);
+  };
 
-    return () => {
-      socket.off("execution-result");
-    };
-  }, []);
+  const handleEditorChange = (nextCode) => {
+    setCode(nextCode);
+    scheduleCodeSync(nextCode);
+  };
+
+  const handleLanguageChange = (nextLanguage) => {
+    setLanguage(nextLanguage);
+    scheduleCodeSync(latestCodeRef.current, nextLanguage);
+  };
 
   const handleRun = async () => {
     try {
-      await runCode(roomId, language, code, token);
-    } catch (err) {
-      setOutput("Execution failed");
+      setIsRunning(true);
+      const response = await runCode(roomId, language, code);
+      setOutput(response.output);
+    } catch (requestError) {
+      setOutput(requestError.error || "Execution failed");
+    } finally {
+      setIsRunning(false);
     }
   };
 
+  const handleSendMessage = () => {
+    if (!chatInput.trim() || !socket.connected) {
+      return;
+    }
+
+    socket.emit("send-message", {
+      roomId,
+      message: chatInput,
+    });
+    setChatInput("");
+  };
+
+  const handleCursorMove = (position) => {
+    if (!canEdit || !socket.connected) {
+      return;
+    }
+
+    socket.emit("cursor_move", {
+      roomId,
+      position,
+    });
+  };
+
+  const handleRoleChange = async (memberId, nextRole) => {
+    setActionUserId(memberId);
+
+    try {
+      const response = await changeRoomRole(roomId, memberId, nextRole);
+      setRoom(response.room);
+    } catch (requestError) {
+      setError(requestError.error || "Unable to update role.");
+    } finally {
+      setActionUserId(null);
+    }
+  };
+
+  const handleRemoveUser = async (memberId) => {
+    setActionUserId(memberId);
+
+    try {
+      const response = await removeRoomUser(roomId, memberId);
+      setRoom(response.room);
+    } catch (requestError) {
+      setError(requestError.error || "Unable to remove user.");
+    } finally {
+      setActionUserId(null);
+    }
+  };
+
+  const handleTransferOwnership = async (memberId) => {
+    setActionUserId(memberId);
+
+    try {
+      const response = await transferRoomOwnership(roomId, memberId);
+      setRoom(response.room);
+    } catch (requestError) {
+      setError(requestError.error || "Unable to transfer ownership.");
+    } finally {
+      setActionUserId(null);
+    }
+  };
+
+  const handleCopyRoom = async () => {
+    try {
+      await navigator.clipboard.writeText(roomId);
+    } catch {
+      setError("Clipboard access is not available.");
+    }
+  };
+
+  const handleSignOut = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
+  const handleLeaveRoom = () => {
+    socket.emit("leave-room", { roomId });
+    navigate("/dashboard", { replace: true });
+  };
+
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="editor-page">
       <Header
-        roomId={roomId}
+        canEdit={canEdit}
+        connectionStatus={connectionStatus}
+        isRunning={isRunning}
         language={language}
-        setLanguage={setLanguage}
+        onCopyRoom={handleCopyRoom}
+        onLeave={handleSignOut}
         onRun={handleRun}
+        roomId={roomId}
+        setLanguage={handleLanguageChange}
+        userRole={currentMember?.role}
       />
 
-      <div style={{ flex: 1, display: "flex" }}>
-        <div style={{ flex: 3, display: "flex", flexDirection: "column" }}>
+      <div className="editor-toolbar">
+        <button type="button" className="ghost-button" onClick={handleLeaveRoom}>
+          Back to dashboard
+        </button>
+        {error ? <span className="editor-error">{error}</span> : null}
+      </div>
+
+      <main className="editor-layout">
+        <section className="editor-workbench">
           <CodeEditor
             code={code}
-            setCode={setCode}
-            roomId={roomId}
-            joined={joined}
+            language={language}
+            onChange={handleEditorChange}
+            onCursorMove={handleCursorMove}
+            readOnly={!canEdit}
+            remoteCursors={activeCursors}
           />
+          <Output isRunning={isRunning} output={output} />
+        </section>
 
-          <Output output={output} />
-        </div>
-
-        <div style={{ flex: 1 }}>
-          <Chat roomId={roomId} />
-        </div>
-
-        <div style={{ width: "250px" }}>
-          <Participants roomId={roomId} />
-        </div>
-      </div>
+        <aside className="editor-sidebar">
+          <Participants
+            actionUserId={actionUserId}
+            currentUserId={currentUserId}
+            isOwner={isOwner}
+            members={room?.members || []}
+            onChangeRole={handleRoleChange}
+            onRemoveUser={handleRemoveUser}
+            onTransferOwnership={handleTransferOwnership}
+          />
+          <Chat
+            currentUserId={currentUserId}
+            input={chatInput}
+            isConnected={connectionStatus === "connected"}
+            messages={messages}
+            onInputChange={setChatInput}
+            onSend={handleSendMessage}
+          />
+        </aside>
+      </main>
     </div>
   );
 };

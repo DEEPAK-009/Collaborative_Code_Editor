@@ -1,6 +1,6 @@
 import { useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 
 const OAuthSuccess = () => {
   const navigate = useNavigate();
@@ -16,9 +16,9 @@ const OAuthSuccess = () => {
     } else {
       navigate("/login");
     }
-  }, []);
+  }, [login, navigate]);
 
-  return <div>Logging you in...</div>;
+  return <div className="route-shell">Completing Google sign-in...</div>;
 };
 
 export default OAuthSuccess;

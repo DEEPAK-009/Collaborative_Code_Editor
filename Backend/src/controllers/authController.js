@@ -1,25 +1,26 @@
 const authService = require("../services/authService");
-const jwt = require("jsonwebtoken");
+const { signAuthToken } = require("../utils/jwt");
 
 const signup = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, displayName } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !displayName?.trim()) {
       return res.status(400).json({
-        error: "Email and password required",
+        error: "Display name, email, and password are required",
       });
     }
 
-    const { user, token } = await authService.signupUser(email, password);
+    const { user, token } = await authService.signupUser({
+      email,
+      password,
+      displayName,
+    });
 
     res.status(201).json({
       message: "User created",
       token,
-      user: {
-        id: user._id,
-        email: user.email,
-      },
+      user,
     });
   } catch (error) {
     res.status(400).json({
@@ -32,15 +33,18 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const { user, token } = await authService.loginUser(email, password);
+    if (!email || !password) {
+      return res.status(400).json({
+        error: "Email and password are required",
+      });
+    }
+
+    const { user, token } = await authService.loginUser({ email, password });
 
     res.json({
       message: "Login successful",
       token,
-      user: {
-        id: user._id,
-        email: user.email,
-      },
+      user,
     });
   } catch (error) {
     res.status(400).json({
@@ -49,31 +53,43 @@ const login = async (req, res) => {
   }
 };
 
-// function is no longer needed once you switch to Passport for Google OAuth.
-const googleAuth = async (req, res) => {
-  res.json({ message: "Google auth route working" });
+const me = async (req, res) => {
+  try {
+    const user = await authService.getCurrentUser(req.user.id);
+    res.json({ user });
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
 };
 
-// The controller is only used after Google finishes authentication.
+const updateMe = async (req, res) => {
+  try {
+    const { displayName, password } = req.body;
+    const result = await authService.updateCurrentUser({
+      userId: req.user.id,
+      displayName,
+      password,
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 const googleCallback = async (req, res) => {
   const user = req.user;
-  const token = jwt.sign(
-    {
-      id: user._id,
-      email: user.email
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES
-    }
-  );
-  const redirectURL = `http://localhost:5173/oauth-success?token=${token}`;
+  const token = signAuthToken(user);
+  const redirectURL = `${
+    process.env.FRONTEND_URL || "http://localhost:5173"
+  }/oauth-success?token=${encodeURIComponent(token)}`;
   res.redirect(redirectURL);
 };
 
 module.exports = {
   signup,
   login,
-  googleAuth,
+  me,
   googleCallback,
+  updateMe,
 };

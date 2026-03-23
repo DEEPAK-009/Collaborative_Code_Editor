@@ -1,19 +1,4 @@
-// Client request
-// ↓
-// Authorization header sent
-
-// Authorization: Bearer <token>
-
-// ↓
-// Middleware verifies JWT
-// ↓
-// If valid → attach user to request
-// ↓
-// req.user = decoded token
-// ↓
-// Continue request
-
-const jwt = require("jsonwebtoken");
+const { verifyAuthToken } = require("../utils/jwt");
 
 const authenticateUser = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -27,7 +12,7 @@ const authenticateUser = (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyAuthToken(token);
 
     req.user = decoded;
 

@@ -1,176 +1,228 @@
 const roomService = require("../services/roomService");
 const chatService = require("../services/chatService");
+const presenceStore = require("./presenceStore");
 
-const rooms = {};
+const DISCONNECT_GRACE_MS = 15000;
+const CURSOR_THROTTLE_MS = 100;
 
-const isUserInRoom = (roomId, userId) => {
-  if (!rooms[roomId]) return false;
+const emitRoomSnapshot = async (io, roomId) => {
+  const room = await roomService.getRoom(roomId);
 
-  return rooms[roomId].some((u) => u.userId === userId);
+  if (!room) {
+    return;
+  }
+
+  const activeUsers = presenceStore.getActiveUsers(roomId);
+  io.to(roomId).emit("presence-updated", activeUsers);
+  io.to(roomId).emit("room-updated", roomService.serializeRoom(room, activeUsers));
+};
+
+const finalizeDeparture = async (io, roomId, userId) => {
+  if (presenceStore.hasActiveUserInRoom(roomId, userId)) {
+    return;
+  }
+
+  try {
+    const result = await roomService.leaveRoom(roomId, userId);
+
+    if (result.deleted) {
+      io.to(roomId).emit("room-closed", { roomId });
+      presenceStore.clearRoom(roomId);
+      return;
+    }
+
+    if (result.ownershipTransferredTo) {
+      presenceStore.setUserRole(
+        roomId,
+        result.ownershipTransferredTo.userId,
+        "owner"
+      );
+      io.to(roomId).emit("ownership-transferred", result.ownershipTransferredTo);
+    }
+
+    await emitRoomSnapshot(io, roomId);
+    io.to(roomId).emit("user-left", { roomId, userId });
+  } catch (error) {
+    if (error.message !== "Room not found") {
+      console.error("Failed to finalize room departure", error);
+    }
+  }
 };
 
 const socketHandler = (io) => {
   io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
-
     const lastCursorUpdate = {};
 
-    // JOIN ROOM
-    socket.on("join-room", async ({ roomId, username }) => {
-      console.log("JOIN EVENT RECEIVED:", roomId);
-      console.log("USERNAME RECEIVED:", username)
-      const userId = socket.user.id;
-      const room = await roomService.joinRoom(roomId, userId, username);
-      if (!room) return;
-      socket.join(roomId);
+    const handleJoinRoom = async (payload = {}, rejoined = false) => {
+      const { roomId } = payload;
 
-      socket.emit("load-code", { code: room.code });
-
-      const messages = await chatService.getRoomMessages(roomId);
-      socket.emit("chat-history", messages);
-
-      if (!rooms[roomId]) {
-        rooms[roomId] = [];
+      if (!roomId) {
+        socket.emit("room-error", { message: "Room ID is required" });
+        return;
       }
 
-      const member = room.members.find((m) => m.userId.toString() === userId);
+      try {
+        const room = await roomService.joinRoom(roomId, socket.user.id);
+        const member = room.members.find(
+          (activeMember) => activeMember.userId === socket.user.id
+        );
 
-      if (!member) return;
+        socket.join(roomId);
+        socket.data.roomId = roomId;
+        socket.data.userId = socket.user.id;
 
-      // prevent duplicate sockets
-      const exists = rooms[roomId].some((u) => u.socketId === socket.id);
-
-      if (!exists) {
-        rooms[roomId].push({
-          userId,
-          username,
+        presenceStore.clearDisconnectCleanup(roomId, socket.user.id);
+        presenceStore.addSocketToRoom({
+          roomId,
+          userId: socket.user.id,
           socketId: socket.id,
+          displayName: member.displayName,
           role: member.role,
         });
+
+        const messages = await chatService.getRoomMessages(roomId);
+        const activeUsers = presenceStore.getActiveUsers(roomId);
+
+        socket.emit("room-state", {
+          room: roomService.serializeRoom(room, activeUsers),
+          messages,
+          rejoined,
+        });
+
+        io.to(roomId).emit("presence-updated", activeUsers);
+        io.to(roomId).emit("room-updated", roomService.serializeRoom(room, activeUsers));
+      } catch (error) {
+        const message =
+          error.message === "Room not found"
+            ? "Room not found"
+            : "Unable to join room";
+
+        socket.emit("room-error", { message });
+      }
+    };
+
+    socket.on("join-room", async (payload) => {
+      await handleJoinRoom(payload, false);
+    });
+
+    socket.on("rejoin-room", async (payload) => {
+      await handleJoinRoom(payload, true);
+    });
+
+    socket.on("code-change", async ({ roomId, code, language }) => {
+      const userId = socket.user.id;
+
+      if (!roomId || typeof code !== "string") {
+        return;
       }
 
-      io.to(roomId).emit("users-update", rooms[roomId]);
+      const activeUser = presenceStore.getActiveUser(roomId, userId);
 
-      socket.to(roomId).emit("user-joined", {
-        userId,
-        socketId: socket.id,
+      if (!activeUser || !["owner", "editor"].includes(activeUser.role)) {
+        return;
+      }
+
+      const room = await roomService.updateRoomCode(roomId, code, language);
+
+      io.to(roomId).emit("code-update", {
+        code,
+        language: room?.language || language,
+        updatedBy: userId,
       });
+      await emitRoomSnapshot(io, roomId);
     });
 
-    // CODE CHANGE
-    socket.on("code-change", async ({ roomId, code }) => {
-      const userId = socket.user.id;
-      if (!isUserInRoom(roomId, userId)) return;
-      await roomService.updateRoomCode(roomId, code);
-      console.log("code saved ", code);
-      io.to(roomId).emit("code-update", { code });
-
-      socket.to(roomId).emit("cursor-reset");
-    });
-
-    // CHAT MESSAGE
     socket.on("send-message", async ({ roomId, message }) => {
       const userId = socket.user.id;
+      const activeUser = presenceStore.getActiveUser(roomId, userId);
 
-      if (!isUserInRoom(roomId, userId)) return;
-
-      // ✅ Get user from in-memory room
-      const member = rooms[roomId]?.find((u) => u.userId === userId);
-
-      if (!member) return; // safety check
+      if (!activeUser || !message?.trim()) {
+        return;
+      }
 
       const savedMessage = await chatService.saveMessage(
         roomId,
         userId,
-        member.username, // ✅ correct source
-        message,
+        activeUser.displayName,
+        message.trim()
       );
 
       io.to(roomId).emit("receive-message", savedMessage);
     });
 
-    // LEAVE ROOM
-    socket.on("leave-room", ({ roomId }) => {
+    socket.on("leave-room", async ({ roomId }) => {
       const userId = socket.user.id;
-      if (!isUserInRoom(roomId, userId)) return;
 
+      presenceStore.clearDisconnectCleanup(roomId, userId);
       socket.leave(roomId);
+      const removal = presenceStore.removeSocket(socket.id);
 
-      if (!rooms[roomId]) return;
+      if (!removal) {
+        return;
+      }
 
-      rooms[roomId] = rooms[roomId].filter((u) => u.socketId !== socket.id);
+      io.to(roomId).emit("cursor-remove", { userId });
 
-      io.to(roomId).emit("users-update", rooms[roomId]);
-
-      socket.to(roomId).emit("user-left", userId);
-    });
-
-    // DISCONNECT
-    socket.on("disconnect", async () => {
-      console.log("User disconnected:", socket.id);
-
-      delete lastCursorUpdate[socket.id];
-
-      for (const roomId in rooms) {
-        const roomUsers = rooms[roomId];
-
-        const leavingUser = roomUsers.find((u) => u.socketId === socket.id);
-
-        if (!leavingUser) continue;
-
-        rooms[roomId] = roomUsers.filter((u) => u.socketId !== socket.id);
-
-        const remainingUsers = rooms[roomId];
-
-        // CASE 1 → room empty
-        if (remainingUsers.length === 0) {
-          await roomService.deleteRoom(roomId);
-
-          delete rooms[roomId];
-
-          continue;
-        }
-
-        // CASE 2 → owner leaves
-        const room = await roomService.getRoom(roomId);
-
-        if (room && room.ownerId.toString() === leavingUser.userId) {
-          const newOwner = await roomService.autoTransferOwnership(roomId);
-
-          if (newOwner) {
-            io.to(roomId).emit("ownership-transferred", newOwner);
-          }
-        }
-
-        io.to(roomId).emit("users-update", remainingUsers);
-
-        io.to(roomId).emit("user-left", leavingUser.userId);
+      if (!removal.hasRemainingUserSockets) {
+        await finalizeDeparture(io, roomId, userId);
+      } else {
+        await emitRoomSnapshot(io, roomId);
       }
     });
 
-    // CURSOR MOVE
-    socket.on("cursor_move", ({ roomId, username, position }) => {
+    socket.on("disconnect", async () => {
+      delete lastCursorUpdate[socket.id];
+
+      const removal = presenceStore.removeSocket(socket.id);
+
+      if (!removal) {
+        return;
+      }
+
+      io.to(removal.roomId).emit("cursor-remove", { userId: removal.userId });
+      await emitRoomSnapshot(io, removal.roomId);
+
+      if (!removal.hasRemainingUserSockets) {
+        presenceStore.scheduleDisconnectCleanup(
+          removal.roomId,
+          removal.userId,
+          async () => {
+            await finalizeDeparture(io, removal.roomId, removal.userId);
+          },
+          DISCONNECT_GRACE_MS
+        );
+      }
+    });
+
+    socket.on("cursor_move", ({ roomId, position }) => {
       const userId = socket.user.id;
       const now = Date.now();
-      if (!isUserInRoom(roomId, userId)) return;
+      const activeUser = presenceStore.getActiveUser(roomId, userId);
+
+      if (!activeUser || !["owner", "editor"].includes(activeUser.role)) {
+        return;
+      }
+
       if (
         lastCursorUpdate[socket.id] &&
-        now - lastCursorUpdate[socket.id] < 100
+        now - lastCursorUpdate[socket.id] < CURSOR_THROTTLE_MS
       ) {
         return;
       }
 
       lastCursorUpdate[socket.id] = now;
 
-      if (!rooms[roomId]) return;
-
-      const member = rooms[roomId].find((u) => u.userId === userId);
-
-      if (!member || !["owner", "editor"].includes(member.role)) return;
+      if (
+        !position ||
+        typeof position.lineNumber !== "number" ||
+        typeof position.column !== "number"
+      ) {
+        return;
+      }
 
       socket.to(roomId).emit("cursor_update", {
         userId,
-        username,
+        displayName: activeUser.displayName,
         position,
       });
     });

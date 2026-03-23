@@ -18,7 +18,7 @@ module.exports = {
   },
 
   java: {
-    image: "openjdk:17",
+    image: "eclipse-temurin:17-jdk",
     filename: "Main.java",
     run: "javac Main.java && java Main",
   },
