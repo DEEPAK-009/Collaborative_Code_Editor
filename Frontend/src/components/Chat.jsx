@@ -39,13 +39,15 @@ const Chat = ({
           return (
             <div
               key={message.id || `${message.userId}-${message.createdAt}`}
-              className={`chat-bubble ${isMine ? "mine" : ""}`}
+              className={`chat-row ${isMine ? "chat-row--mine" : ""}`}
             >
-              <div className="chat-meta">
-                <span>{message.displayName}</span>
-                <span>{new Date(message.createdAt).toLocaleTimeString()}</span>
+              <div className={`chat-bubble ${isMine ? "mine" : ""}`}>
+                <div className="chat-meta">
+                  <span>{message.displayName}</span>
+                  <span>{new Date(message.createdAt).toLocaleTimeString()}</span>
+                </div>
+                <p>{message.message}</p>
               </div>
-              <p>{message.message}</p>
             </div>
           );
         })}

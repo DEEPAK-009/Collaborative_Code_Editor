@@ -359,20 +359,20 @@ const Editor = () => {
     }
   };
 
-  const handleCopyRoom = async () => {
-    try {
-      await navigator.clipboard.writeText(roomId);
-    } catch {
-      setError("Clipboard access is not available.");
-    }
-  };
-
   const handleSignOut = () => {
+    if (!window.confirm("Sign out now?")) {
+      return;
+    }
+
     logout();
     navigate("/login", { replace: true });
   };
 
   const handleLeaveRoom = () => {
+    if (!window.confirm("Leave the room and go back to dashboard?")) {
+      return;
+    }
+
     socket.emit("leave-room", { roomId });
     navigate("/dashboard", { replace: true });
   };
@@ -384,20 +384,13 @@ const Editor = () => {
         connectionStatus={connectionStatus}
         isRunning={isRunning}
         language={language}
-        onCopyRoom={handleCopyRoom}
+        onBackToDashboard={handleLeaveRoom}
         onLeave={handleSignOut}
         onRun={handleRun}
         roomId={roomId}
         setLanguage={handleLanguageChange}
         userRole={currentMember?.role}
       />
-
-      <div className="editor-toolbar">
-        <button type="button" className="ghost-button" onClick={handleLeaveRoom}>
-          Back to dashboard
-        </button>
-        {error ? <span className="editor-error">{error}</span> : null}
-      </div>
 
       <main className="editor-layout">
         <section className="editor-workbench">
@@ -432,6 +425,8 @@ const Editor = () => {
           />
         </aside>
       </main>
+
+      {error ? <div className="editor-toast">{error}</div> : null}
     </div>
   );
 };

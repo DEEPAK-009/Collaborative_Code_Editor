@@ -1,5 +1,5 @@
 import { useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { createRoom, joinRoom } from "../api/room";
 import { AuthContext } from "../context/auth-context";
 import "../styles/dashboard.css";
@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
 
   const welcomeName = useMemo(
@@ -21,6 +22,8 @@ const Dashboard = () => {
       "builder",
     [displayName, user]
   );
+
+  const pageError = location.state?.error || error;
 
   const syncDisplayName = async () => {
     const trimmedName = displayName.trim();
@@ -69,16 +72,27 @@ const Dashboard = () => {
     }
   };
 
+  const handleSignOut = () => {
+    if (!window.confirm("Sign out now?")) {
+      return;
+    }
+
+    logout();
+    navigate("/", { replace: true });
+  };
+
   return (
     <div className="dashboard-wrapper">
-      <section className="dashboard-hero">
-        <p className="dashboard-kicker">Collaborative code editor</p>
-        <h1>Ship code in shared rooms without losing realtime context.</h1>
-        <p className="dashboard-lede">
-          {welcomeName}, choose whether you want to launch a fresh workspace or
-          attach to an existing room with chat, runtime output, roles, and live
-          cursors already wired in.
-        </p>
+      <section className="dashboard-shell">
+        <div className="dashboard-topbar">
+          <div>
+            <p className="dashboard-kicker">Workspace</p>
+            <h1>{welcomeName}</h1>
+          </div>
+          <button type="button" className="ghost-button" onClick={handleSignOut}>
+            Sign out
+          </button>
+        </div>
 
         <div className="dashboard-profile-card">
           <label className="dashboard-label" htmlFor="displayName">
@@ -93,55 +107,45 @@ const Dashboard = () => {
           />
           <div className="dashboard-profile-meta">
             <span>{user?.email}</span>
-            <button type="button" className="ghost-button" onClick={logout}>
-              Sign out
+            <span>Update once, used in every room</span>
+          </div>
+          {pageError ? <div className="dashboard-error">{pageError}</div> : null}
+        </div>
+
+        <section className="dashboard-grid">
+          <div className="dashboard-card card-glow-blue">
+            <div className="dashboard-card-copy">
+              <p className="dashboard-card-tag">Join</p>
+              <h2 className="dashboard-title">
+                Existing <span className="blue">Room</span>
+              </h2>
+            </div>
+
+            <input
+              className="dashboard-input focus-blue"
+              placeholder="Room ID"
+              value={roomCode}
+              onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
+            />
+
+            <button onClick={handleJoinRoom} className="dashboard-btn btn-blue" disabled={isJoining}>
+              {isJoining ? "Connecting..." : "Join room"}
             </button>
           </div>
-          {error ? <div className="dashboard-error">{error}</div> : null}
-        </div>
-      </section>
 
-      <section className="dashboard-grid">
-        <div className="dashboard-card card-glow-blue">
-          <div className="dashboard-card-copy">
-            <p className="dashboard-card-tag">Existing room</p>
-            <h2 className="dashboard-title">
-              Join <span className="blue">Workspace</span>
-            </h2>
-            <p>
-              Reconnect to a room using its code and restore live editing,
-              messages, and member presence.
-            </p>
+          <div className="dashboard-card card-glow-green">
+            <div className="dashboard-card-copy">
+              <p className="dashboard-card-tag">Create</p>
+              <h2 className="dashboard-title">
+                New <span className="green">Room</span>
+              </h2>
+            </div>
+
+            <button onClick={handleCreateRoom} className="dashboard-btn btn-green" disabled={isCreating}>
+              {isCreating ? "Initializing..." : "Create room"}
+            </button>
           </div>
-
-          <input
-            className="dashboard-input focus-blue"
-            placeholder="Room ID"
-            value={roomCode}
-            onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
-          />
-
-          <button onClick={handleJoinRoom} className="dashboard-btn btn-blue" disabled={isJoining}>
-            {isJoining ? "Connecting..." : "Connect"}
-          </button>
-        </div>
-
-        <div className="dashboard-card card-glow-green">
-          <div className="dashboard-card-copy">
-            <p className="dashboard-card-tag">Fresh session</p>
-            <h2 className="dashboard-title">
-              New <span className="green">Workspace</span>
-            </h2>
-            <p>
-              Spin up a new room, become its owner, and invite collaborators with
-              a single room ID.
-            </p>
-          </div>
-
-          <button onClick={handleCreateRoom} className="dashboard-btn btn-green" disabled={isCreating}>
-            {isCreating ? "Initializing..." : "Initialize"}
-          </button>
-        </div>
+        </section>
       </section>
     </div>
   );

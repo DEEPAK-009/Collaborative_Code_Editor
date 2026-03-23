@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const Participants = ({
   actionUserId,
   currentUserId,
@@ -7,6 +9,14 @@ const Participants = ({
   onRemoveUser,
   onTransferOwnership,
 }) => {
+  const [openMenuUserId, setOpenMenuUserId] = useState(null);
+
+  const toggleMenu = (userId) => {
+    setOpenMenuUserId((currentUserIdValue) =>
+      currentUserIdValue === userId ? null : userId
+    );
+  };
+
   return (
     <section className="panel participants-panel">
       <div className="panel-header">
@@ -20,6 +30,7 @@ const Participants = ({
         {members.map((member) => {
           const isCurrentUser = member.userId === currentUserId;
           const isLoading = actionUserId === member.userId;
+          const isMenuOpen = openMenuUserId === member.userId;
 
           return (
             <article key={member.userId} className="participant-card">
@@ -37,37 +48,58 @@ const Participants = ({
                   <span className={`status-pill ${member.isActive ? "online" : "offline"}`}>
                     {member.isActive ? "Online" : "Offline"}
                   </span>
+                  {isOwner && !isCurrentUser ? (
+                    <div className="participant-menu-wrap">
+                      <button
+                        type="button"
+                        className="participant-menu-trigger"
+                        onClick={() => toggleMenu(member.userId)}
+                        aria-label={`Open actions for ${member.displayName}`}
+                      >
+                        ...
+                      </button>
+
+                      {isMenuOpen ? (
+                        <div className="participant-menu">
+                          <select
+                            value={member.role}
+                            onChange={(event) => {
+                              onChangeRole(member.userId, event.target.value);
+                              setOpenMenuUserId(null);
+                            }}
+                            disabled={isLoading}
+                          >
+                            <option value="editor">Editor</option>
+                            <option value="viewer">Viewer</option>
+                          </select>
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            disabled={isLoading}
+                            onClick={() => {
+                              onTransferOwnership(member.userId);
+                              setOpenMenuUserId(null);
+                            }}
+                          >
+                            Transfer owner
+                          </button>
+                          <button
+                            type="button"
+                            className="danger-button"
+                            disabled={isLoading}
+                            onClick={() => {
+                              onRemoveUser(member.userId);
+                              setOpenMenuUserId(null);
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
-
-              {isOwner && !isCurrentUser ? (
-                <div className="participant-actions">
-                  <select
-                    value={member.role}
-                    onChange={(event) => onChangeRole(member.userId, event.target.value)}
-                    disabled={isLoading}
-                  >
-                    <option value="editor">Editor</option>
-                    <option value="viewer">Viewer</option>
-                  </select>
-                  <button
-                    type="button"
-                    className="ghost-button"
-                    disabled={isLoading}
-                    onClick={() => onTransferOwnership(member.userId)}
-                  >
-                    Transfer owner
-                  </button>
-                  <button
-                    type="button"
-                    className="danger-button"
-                    disabled={isLoading}
-                    onClick={() => onRemoveUser(member.userId)}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : null}
             </article>
           );
         })}
