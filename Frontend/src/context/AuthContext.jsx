@@ -5,11 +5,12 @@ import {
   clearPersistedAuth,
   decodeAuthToken,
   persistAuth,
+  readStoredToken,
   readStoredUser,
 } from "../utils/auth";
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(readStoredToken());
   const [user, setUser] = useState(readStoredUser());
   const [isAuthReady, setIsAuthReady] = useState(false);
 

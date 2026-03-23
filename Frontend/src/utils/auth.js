@@ -1,3 +1,6 @@
+const AUTH_STORAGE = window.sessionStorage;
+const LEGACY_STORAGE = window.localStorage;
+
 const decodeBase64Url = (value) => {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const remainder = normalized.length % 4;
@@ -25,9 +28,17 @@ export const decodeAuthToken = (token) => {
   }
 };
 
+export const readStoredToken = () => {
+  try {
+    return AUTH_STORAGE.getItem("token");
+  } catch {
+    return null;
+  }
+};
+
 export const readStoredUser = () => {
   try {
-    const rawUser = localStorage.getItem("user");
+    const rawUser = AUTH_STORAGE.getItem("user");
     return rawUser ? JSON.parse(rawUser) : null;
   } catch {
     return null;
@@ -36,16 +47,21 @@ export const readStoredUser = () => {
 
 export const persistAuth = ({ token, user }) => {
   if (token) {
-    localStorage.setItem("token", token);
+    AUTH_STORAGE.setItem("token", token);
+    LEGACY_STORAGE.removeItem("token");
   }
 
   if (user) {
-    localStorage.setItem("user", JSON.stringify(user));
+    AUTH_STORAGE.setItem("user", JSON.stringify(user));
+    LEGACY_STORAGE.removeItem("user");
   }
 };
 
 export const clearPersistedAuth = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  localStorage.removeItem("activeRoomId");
+  AUTH_STORAGE.removeItem("token");
+  AUTH_STORAGE.removeItem("user");
+  AUTH_STORAGE.removeItem("activeRoomId");
+  LEGACY_STORAGE.removeItem("token");
+  LEGACY_STORAGE.removeItem("user");
+  LEGACY_STORAGE.removeItem("activeRoomId");
 };

@@ -87,7 +87,7 @@ const Editor = () => {
         setRoom(response.room);
         setCode(response.room.code || "");
         setLanguage(response.room.language || "javascript");
-        localStorage.setItem("activeRoomId", roomId);
+        sessionStorage.setItem("activeRoomId", roomId);
       } catch (requestError) {
         if (cancelled) {
           return;
@@ -136,7 +136,7 @@ const Editor = () => {
       setLanguage(nextRoom.language || "javascript");
 
       if (!nextRoom.members.some((member) => member.userId === currentUserId)) {
-        localStorage.removeItem("activeRoomId");
+        sessionStorage.removeItem("activeRoomId");
         navigate("/dashboard", { replace: true });
       }
     };
@@ -203,12 +203,12 @@ const Editor = () => {
     };
 
     const handleRemovedFromRoom = () => {
-      localStorage.removeItem("activeRoomId");
+      sessionStorage.removeItem("activeRoomId");
       navigate("/dashboard", { replace: true });
     };
 
     const handleRoomClosed = () => {
-      localStorage.removeItem("activeRoomId");
+      sessionStorage.removeItem("activeRoomId");
       navigate("/dashboard", { replace: true });
     };
 
@@ -423,7 +423,7 @@ const Editor = () => {
     }
 
     socket.emit("leave-room", { roomId });
-    localStorage.removeItem("activeRoomId");
+    sessionStorage.removeItem("activeRoomId");
     navigate("/dashboard", { replace: true });
   };
 
