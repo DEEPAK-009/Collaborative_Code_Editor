@@ -46,7 +46,7 @@ const Chat = ({
                   <span>{message.displayName}</span>
                   <span>{new Date(message.createdAt).toLocaleTimeString()}</span>
                 </div>
-                <p>{message.message}</p>
+                <p>{message.message || " "}</p>
               </div>
             </div>
           );

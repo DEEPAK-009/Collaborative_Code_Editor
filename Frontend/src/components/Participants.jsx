@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Participants = ({
   actionUserId,
@@ -16,6 +16,20 @@ const Participants = ({
       currentUserIdValue === userId ? null : userId
     );
   };
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (!event.target.closest(".participant-menu-wrap")) {
+        setOpenMenuUserId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, []);
 
   return (
     <section className="panel participants-panel">
@@ -35,19 +49,15 @@ const Participants = ({
           return (
             <article key={member.userId} className="participant-card">
               <div className="participant-main">
-                <div>
+                <div className="participant-info">
                   <div className="participant-title-row">
                     <h4>{member.displayName}</h4>
                     {isCurrentUser ? <span className="self-badge">You</span> : null}
                   </div>
-                  <p>{member.isActive ? "Active now" : "Away"}</p>
                 </div>
 
                 <div className="participant-badges">
                   <span className={`role-pill role-${member.role}`}>{member.role}</span>
-                  <span className={`status-pill ${member.isActive ? "online" : "offline"}`}>
-                    {member.isActive ? "Online" : "Offline"}
-                  </span>
                   {isOwner && !isCurrentUser ? (
                     <div className="participant-menu-wrap">
                       <button
@@ -56,7 +66,9 @@ const Participants = ({
                         onClick={() => toggleMenu(member.userId)}
                         aria-label={`Open actions for ${member.displayName}`}
                       >
-                        ...
+                        <span />
+                        <span />
+                        <span />
                       </button>
 
                       {isMenuOpen ? (

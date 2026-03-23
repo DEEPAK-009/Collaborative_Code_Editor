@@ -2,7 +2,7 @@ const roomService = require("../services/roomService");
 const chatService = require("../services/chatService");
 const presenceStore = require("./presenceStore");
 
-const DISCONNECT_GRACE_MS = 15000;
+const DISCONNECT_GRACE_MS = 5000;
 const CURSOR_THROTTLE_MS = 100;
 
 const emitRoomSnapshot = async (io, roomId) => {

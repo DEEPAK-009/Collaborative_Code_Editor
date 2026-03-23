@@ -2,9 +2,9 @@
   min-height: 100vh;
   padding: 24px;
   background:
-    radial-gradient(circle at top left, rgba(22, 103, 255, 0.08), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(15, 159, 99, 0.08), transparent 26%),
-    #f3f6fb;
+    radial-gradient(circle at top left, rgba(22, 103, 255, 0.13), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(15, 159, 99, 0.12), transparent 28%),
+    linear-gradient(180deg, #f6f9ff 0%, #eff5fb 100%);
 }
 
 .home-nav,
@@ -28,8 +28,7 @@
 
 .home-brand,
 .home-nav__actions,
-.home-cta,
-.home-preview__content {
+.home-highlights {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -51,34 +50,26 @@
 }
 
 .home-nav__link,
-.home-secondary {
-  color: #1f2a3d;
-  text-decoration: none;
-}
-
-.home-nav__button,
-.home-primary {
+.home-nav__button {
   min-height: 44px;
   padding: 0 18px;
   border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #1667ff;
-  color: #ffffff;
   text-decoration: none;
   font-weight: 600;
 }
 
-.home-secondary {
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: 12px;
-  border: 1px solid #d8e0ea;
+.home-nav__link {
+  color: #1f2a3d;
   background: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid #d8e0ea;
+}
+
+.home-nav__button {
+  background: #1667ff;
+  color: #ffffff;
 }
 
 .home-hero {
@@ -113,62 +104,63 @@
   font-size: 1.04rem;
 }
 
-.home-preview__panel {
-  padding: 18px;
+.home-highlights {
+  flex-wrap: wrap;
 }
 
-.home-preview__bar {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-
-.home-preview__bar span {
-  width: 10px;
-  height: 10px;
+.home-highlights span {
+  min-height: 38px;
+  padding: 0 14px;
   border-radius: 999px;
-  background: #d1d9e4;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #d8e0ea;
+  color: #405168;
+  font-weight: 600;
 }
 
-.home-preview__content {
-  align-items: stretch;
-}
-
-.home-preview__editor {
-  flex: 1;
-  border-radius: 16px;
+.home-preview__panel {
+  position: relative;
+  min-height: 520px;
+  overflow: hidden;
   padding: 18px;
-  background: #0f172a;
-  color: #dbe7ff;
-  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+}
+
+.home-preview__image {
+  position: absolute;
+  inset: 18px;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.45)),
+    url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80")
+      center/cover;
+}
+
+.home-preview__overlay {
+  position: relative;
+  z-index: 1;
+  height: 100%;
   display: grid;
+  align-content: end;
   gap: 12px;
 }
 
-.home-preview__line {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.home-preview__sidebar {
-  width: 180px;
-  display: grid;
-  gap: 10px;
-}
-
-.home-preview__card {
-  border-radius: 14px;
-  border: 1px solid #e3eaf2;
-  padding: 14px;
-  background: #fbfcfe;
+.home-preview__stat {
+  max-width: 300px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 14px 16px;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(12px);
   display: grid;
   gap: 6px;
-  color: #5f6e84;
+  color: rgba(232, 240, 255, 0.82);
 }
 
-.home-preview__card strong {
-  color: #162032;
+.home-preview__stat strong {
+  color: #ffffff;
+  line-height: 1.35;
 }
 
 .home-features {
@@ -199,15 +191,6 @@
   .home-features {
     grid-template-columns: 1fr;
   }
-
-  .home-preview__content {
-    flex-direction: column;
-  }
-
-  .home-preview__sidebar {
-    width: 100%;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 720px) {
@@ -216,19 +199,12 @@
   }
 
   .home-nav,
-  .home-nav__actions,
-  .home-cta,
-  .home-preview__sidebar {
+  .home-nav__actions {
     flex-direction: column;
     align-items: stretch;
   }
 
   .home-nav {
     align-items: stretch;
-  }
-
-  .home-preview__sidebar {
-    display: grid;
-    grid-template-columns: 1fr;
   }
 }

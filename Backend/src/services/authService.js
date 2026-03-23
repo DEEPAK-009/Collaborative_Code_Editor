@@ -97,7 +97,12 @@ const getCurrentUser = async (userId) => {
   return sanitizeUser(user);
 };
 
-const updateCurrentUser = async ({ userId, displayName, password }) => {
+const updateCurrentUser = async ({
+  userId,
+  currentPassword,
+  displayName,
+  password,
+}) => {
   const user = await User.findById(userId);
 
   if (!user) {
@@ -111,6 +116,21 @@ const updateCurrentUser = async ({ userId, displayName, password }) => {
   }
 
   if (password) {
+    if (user.password) {
+      if (!currentPassword) {
+        throw new Error("Current password is required");
+      }
+
+      const isValidPassword = await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+
+      if (!isValidPassword) {
+        throw new Error("Current password is incorrect");
+      }
+    }
+
     updates.password = await bcrypt.hash(password, 10);
     updates.authProviders = Array.from(
       new Set([...(user.authProviders || []), "local"])

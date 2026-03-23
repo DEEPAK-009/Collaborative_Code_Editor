@@ -4,19 +4,35 @@ const Header = ({
   isRunning,
   language,
   onBackToDashboard,
-  onLeave,
   onRun,
   roomId,
   setLanguage,
   userRole,
 }) => {
+  let statusLabel = "Reconnecting";
+
+  if (connectionStatus === "connected") {
+    statusLabel = "Live";
+  } else if (connectionStatus === "connecting") {
+    statusLabel = "Connecting";
+  }
+
   return (
     <header className="editor-header">
       <div className="editor-header__section editor-header__section--left">
-        <button type="button" className="ghost-button" onClick={onBackToDashboard}>
-          Back to dashboard
+        <button
+          type="button"
+          className="icon-button"
+          onClick={onBackToDashboard}
+          aria-label="Leave room and return to dashboard"
+          title="Leave room and return to dashboard"
+        >
+          <span className="door-icon" aria-hidden="true">
+            <span />
+            <span />
+          </span>
         </button>
-        <div>
+        <div className="workspace-chip">
           <p className="panel-kicker">Workspace</p>
           <h1>{roomId}</h1>
         </div>
@@ -39,14 +55,11 @@ const Header = ({
 
       <div className="editor-header__section editor-header__section--right">
         <div className="editor-header__meta">
-          <span className={`status-pill ${connectionStatus}`}>{connectionStatus}</span>
+          <span className={`status-pill ${connectionStatus}`}>{statusLabel}</span>
           <span className={`role-pill role-${userRole || "viewer"}`}>
             {userRole || "viewer"}
           </span>
         </div>
-        <button type="button" className="danger-button" onClick={onLeave}>
-          Sign out
-        </button>
       </div>
     </header>
   );

@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { runCode } from "../api/execute";
 import {
   changeRoomRole,
-  joinRoom,
+  getRoom,
   removeRoomUser,
   transferRoomOwnership,
 } from "../api/room";
@@ -20,7 +20,7 @@ const Editor = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, token, user } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
 
   const [room, setRoom] = useState(location.state?.initialRoom || null);
   const [messages, setMessages] = useState([]);
@@ -37,6 +37,8 @@ const Editor = () => {
   const hasJoinedRef = useRef(false);
   const codeSyncTimeoutRef = useRef(null);
   const latestCodeRef = useRef("");
+  const latestLanguageRef = useRef("javascript");
+  const canEditRef = useRef(false);
 
   const currentUserId = user?.id;
   const currentMember = useMemo(
@@ -58,11 +60,25 @@ const Editor = () => {
   }, [code]);
 
   useEffect(() => {
+    latestLanguageRef.current = language;
+  }, [language]);
+
+  useEffect(() => {
+    canEditRef.current = canEdit;
+  }, [canEdit]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const initializeRoom = async () => {
       try {
-        const response = await joinRoom(roomId);
+        if (location.state?.initialRoom?.roomId === roomId) {
+          setRoom(location.state.initialRoom);
+          setCode(location.state.initialRoom.code || "");
+          setLanguage(location.state.initialRoom.language || "javascript");
+        }
+
+        const response = await getRoom(roomId);
 
         if (cancelled) {
           return;
@@ -91,7 +107,7 @@ const Editor = () => {
     return () => {
       cancelled = true;
     };
-  }, [navigate, roomId]);
+  }, [location.state, navigate, roomId]);
 
   useEffect(() => {
     if (!token) {
@@ -120,6 +136,7 @@ const Editor = () => {
       setLanguage(nextRoom.language || "javascript");
 
       if (!nextRoom.members.some((member) => member.userId === currentUserId)) {
+        localStorage.removeItem("activeRoomId");
         navigate("/dashboard", { replace: true });
       }
     };
@@ -130,15 +147,9 @@ const Editor = () => {
           return currentRoom;
         }
 
-        const activeUserIds = new Set(activeUsers.map((activeUser) => activeUser.userId));
-
         return {
           ...currentRoom,
           activeUsers,
-          members: currentRoom.members.map((member) => ({
-            ...member,
-            isActive: activeUserIds.has(member.userId),
-          })),
         };
       });
 
@@ -152,7 +163,11 @@ const Editor = () => {
     };
 
     const handleCodeUpdate = ({ code: nextCode, language: nextLanguage, updatedBy }) => {
-      if (updatedBy === currentUserId) {
+      if (
+        updatedBy === currentUserId &&
+        nextCode === latestCodeRef.current &&
+        (!nextLanguage || nextLanguage === latestLanguageRef.current)
+      ) {
         return;
       }
 
@@ -188,10 +203,12 @@ const Editor = () => {
     };
 
     const handleRemovedFromRoom = () => {
+      localStorage.removeItem("activeRoomId");
       navigate("/dashboard", { replace: true });
     };
 
     const handleRoomClosed = () => {
+      localStorage.removeItem("activeRoomId");
       navigate("/dashboard", { replace: true });
     };
 
@@ -229,11 +246,19 @@ const Editor = () => {
     }
 
     return () => {
-      if (codeSyncTimeoutRef.current) {
-        clearTimeout(codeSyncTimeoutRef.current);
+      if (canEditRef.current && socket.connected) {
+        socket.emit("code-change", {
+          roomId,
+          code: latestCodeRef.current,
+          language: latestLanguageRef.current,
+        });
       }
 
-      socket.emit("leave-room", { roomId });
+      if (codeSyncTimeoutRef.current) {
+        clearTimeout(codeSyncTimeoutRef.current);
+        codeSyncTimeoutRef.current = null;
+      }
+
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("room-state", handleRoomState);
@@ -249,9 +274,28 @@ const Editor = () => {
       socket.off("room-error", handleRoomError);
       socket.disconnect();
       hasJoinedRef.current = false;
-      localStorage.removeItem("activeRoomId");
     };
   }, [currentUserId, navigate, roomId, token]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!canEditRef.current || !socket.connected) {
+        return;
+      }
+
+      socket.emit("code-change", {
+        roomId,
+        code: latestCodeRef.current,
+        language: latestLanguageRef.current,
+      });
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [roomId]);
 
   const scheduleCodeSync = (nextCode, nextLanguage = language) => {
     if (!canEdit) {
@@ -282,6 +326,7 @@ const Editor = () => {
 
   const handleLanguageChange = (nextLanguage) => {
     setLanguage(nextLanguage);
+    latestLanguageRef.current = nextLanguage;
     scheduleCodeSync(latestCodeRef.current, nextLanguage);
   };
 
@@ -359,21 +404,26 @@ const Editor = () => {
     }
   };
 
-  const handleSignOut = () => {
-    if (!window.confirm("Sign out now?")) {
-      return;
-    }
-
-    logout();
-    navigate("/login", { replace: true });
-  };
-
   const handleLeaveRoom = () => {
     if (!window.confirm("Leave the room and go back to dashboard?")) {
       return;
     }
 
+    if (codeSyncTimeoutRef.current) {
+      clearTimeout(codeSyncTimeoutRef.current);
+      codeSyncTimeoutRef.current = null;
+    }
+
+    if (canEdit && socket.connected) {
+      socket.emit("code-change", {
+        roomId,
+        code: latestCodeRef.current,
+        language: latestLanguageRef.current,
+      });
+    }
+
     socket.emit("leave-room", { roomId });
+    localStorage.removeItem("activeRoomId");
     navigate("/dashboard", { replace: true });
   };
 
@@ -385,7 +435,6 @@ const Editor = () => {
         isRunning={isRunning}
         language={language}
         onBackToDashboard={handleLeaveRoom}
-        onLeave={handleSignOut}
         onRun={handleRun}
         roomId={roomId}
         setLanguage={handleLanguageChange}

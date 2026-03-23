@@ -64,9 +64,10 @@ const me = async (req, res) => {
 
 const updateMe = async (req, res) => {
   try {
-    const { displayName, password } = req.body;
+    const { currentPassword, displayName, password } = req.body;
     const result = await authService.updateCurrentUser({
       userId: req.user.id,
+      currentPassword,
       displayName,
       password,
     });

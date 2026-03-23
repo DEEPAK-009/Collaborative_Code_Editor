@@ -1,7 +1,10 @@
 .dashboard-wrapper {
   min-height: 100vh;
   padding: 28px;
-  background: #f3f6fb;
+  background:
+    radial-gradient(circle at top left, rgba(22, 103, 255, 0.08), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(229, 62, 62, 0.06), transparent 26%),
+    #f3f6fb;
 }
 
 .dashboard-shell {
@@ -13,6 +16,7 @@
 
 .dashboard-topbar,
 .dashboard-profile-card,
+.dashboard-password-card,
 .dashboard-card {
   border-radius: 18px;
   border: 1px solid #d8e0ea;
@@ -34,6 +38,12 @@
   font-size: clamp(1.8rem, 4vw, 2.5rem);
 }
 
+.dashboard-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .dashboard-kicker,
 .dashboard-card-tag,
 .dashboard-label {
@@ -45,7 +55,8 @@
   font-weight: 700;
 }
 
-.dashboard-profile-card {
+.dashboard-profile-card,
+.dashboard-password-card {
   padding: 18px 22px;
 }
 
@@ -56,6 +67,23 @@
   gap: 12px;
   color: #6f7d92;
   font-size: 0.92rem;
+}
+
+.dashboard-password-copy h2 {
+  margin: 4px 0 0;
+  color: #172033;
+}
+
+.dashboard-password-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashboard-password-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .dashboard-grid {
@@ -133,6 +161,12 @@
   color: #ffffff;
 }
 
+.dashboard-btn-inline {
+  width: auto;
+  min-width: 180px;
+  padding: 0 18px;
+}
+
 .btn-blue {
   background: #1667ff;
 }
@@ -150,17 +184,27 @@
 
 .danger-button {
   padding: 0 16px;
-  background: #fff1f2;
-  color: #b91c1c;
+  background: #fee2e2;
+  color: #991b1b;
 }
 
-.dashboard-error {
+.dashboard-error,
+.dashboard-success {
   margin-top: 14px;
   padding: 12px 14px;
   border-radius: 12px;
+}
+
+.dashboard-error {
   border: 1px solid #fecaca;
   background: #ffffff;
   color: #b91c1c;
+}
+
+.dashboard-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
 }
 
 @media (max-width: 820px) {
@@ -169,12 +213,14 @@
   }
 
   .dashboard-topbar,
-  .dashboard-profile-meta {
+  .dashboard-profile-meta,
+  .dashboard-topbar-actions {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .dashboard-grid {
+  .dashboard-grid,
+  .dashboard-password-grid {
     grid-template-columns: 1fr;
   }
 }

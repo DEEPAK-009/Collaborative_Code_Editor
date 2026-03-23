@@ -1,11 +1,7 @@
-import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../context/auth-context";
 import "../styles/home.css";
 
 const Home = () => {
-  const { token } = useContext(AuthContext);
-
   return (
     <div className="home-page">
       <header className="home-nav">
@@ -18,8 +14,8 @@ const Home = () => {
           <Link className="home-nav__link" to="/login">
             Login
           </Link>
-          <Link className="home-nav__button" to={token ? "/dashboard" : "/register"}>
-            {token ? "Open dashboard" : "Get started"}
+          <Link className="home-nav__button" to="/register">
+            Signup
           </Link>
         </div>
       </header>
@@ -27,50 +23,35 @@ const Home = () => {
       <main className="home-hero">
         <section className="home-hero__copy">
           <p className="home-kicker">Realtime collaborative code editor</p>
-          <h1>Write together, chat live, and run code from the same room.</h1>
+          <h1>Write together, review live, and run code from one shared room.</h1>
           <p className="home-subtitle">
-            Built for small teams that need a clean shared workspace with roles,
-            Docker execution, persistent room history, and live presence.
+            CodeSync gives teams a single workspace for realtime editing, role-based
+            collaboration, live chat, room ownership, and Docker-backed execution.
           </p>
 
-          <div className="home-cta">
-            <Link className="home-primary" to={token ? "/dashboard" : "/register"}>
-              {token ? "Go to dashboard" : "Create account"}
-            </Link>
-            <Link className="home-secondary" to="/login">
-              Sign in
-            </Link>
+          <div className="home-highlights">
+            <span>Realtime rooms</span>
+            <span>Socket chat</span>
+            <span>Docker execution</span>
+            <span>Owner controls</span>
           </div>
         </section>
 
         <section className="home-preview">
           <div className="home-preview__panel">
-            <div className="home-preview__bar">
-              <span />
-              <span />
-              <span />
-            </div>
-
-            <div className="home-preview__content">
-              <div className="home-preview__editor">
-                <div className="home-preview__line">const room = await createRoom();</div>
-                <div className="home-preview__line">socket.emit("join-room", room);</div>
-                <div className="home-preview__line">console.log("Live collaboration ready");</div>
+            <div className="home-preview__image" />
+            <div className="home-preview__overlay">
+              <div className="home-preview__stat">
+                <span>Code sessions</span>
+                <strong>Live collaboration for classrooms, teams, and interviews</strong>
               </div>
-
-              <div className="home-preview__sidebar">
-                <div className="home-preview__card">
-                  <span>Participants</span>
-                  <strong>3 active</strong>
-                </div>
-                <div className="home-preview__card">
-                  <span>Chat</span>
-                  <strong>Instant sync</strong>
-                </div>
-                <div className="home-preview__card">
-                  <span>Runtime</span>
-                  <strong>Docker sandbox</strong>
-                </div>
+              <div className="home-preview__stat">
+                <span>Execution</span>
+                <strong>JavaScript, Python, C++, Java, Go, and Rust in Docker</strong>
+              </div>
+              <div className="home-preview__stat">
+                <span>Room controls</span>
+                <strong>Owners manage members, roles, and room ownership without friction</strong>
               </div>
             </div>
           </div>

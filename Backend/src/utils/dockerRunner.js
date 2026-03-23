@@ -21,7 +21,14 @@ const runCode = (language, code) => {
 
     console.log("Directory Path:", dirPath);
 
-    const filePath = path.join(dirPath, config.filename);
+    const filename =
+      typeof config.filename === "function" ? config.filename(code) : config.filename;
+    const runCommand =
+      typeof config.run === "function"
+        ? config.run({ code, filename })
+        : config.run;
+
+    const filePath = path.join(dirPath, filename);
 
     fs.writeFileSync(filePath, code);
 
@@ -31,11 +38,11 @@ const runCode = (language, code) => {
     --network=none \
     -v "${dirPath}:/app" \
     -w /app \
-    ${config.image} sh -c "${config.run}"`;
+    ${config.image} sh -c "${runCommand}"`;
 
     exec(
       dockerCommand,
-      { timeout: 5000, maxBuffer: 1024 * 1024 },
+      { timeout: 60000, maxBuffer: 1024 * 1024 },
       (error, stdout, stderr) => {
         fs.rmSync(dirPath, { recursive: true, force: true });
 
