@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: collaborative-code-editor-backend
+    restart: unless-stopped
+    env_file:
+      - ./Backend/.env
+    environment:
+      PORT: 6050
+      CODE_EXECUTION_TMP_DIR: ${HOST_CODE_EXECUTION_TMP_DIR:-/opt/collaborative-code-editor/Backend/temp}
+    ports:
+      - "${BACKEND_PORT:-6050}:6050"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOST_CODE_EXECUTION_TMP_DIR:-/opt/collaborative-code-editor/Backend/temp}:${HOST_CODE_EXECUTION_TMP_DIR:-/opt/collaborative-code-editor/Backend/temp}

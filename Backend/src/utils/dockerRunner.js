@@ -15,7 +15,11 @@ const runCode = (language, code) => {
 
     const jobId = uuidv4();
 
-    const dirPath = path.resolve(__dirname, "../../temp", jobId);
+    const tempRoot = process.env.CODE_EXECUTION_TMP_DIR
+      ? path.resolve(process.env.CODE_EXECUTION_TMP_DIR)
+      : path.resolve(__dirname, "../../temp");
+
+    const dirPath = path.join(tempRoot, jobId);
 
     fs.mkdirSync(dirPath, { recursive: true });
 
