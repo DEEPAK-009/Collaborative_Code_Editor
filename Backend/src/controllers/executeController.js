@@ -1,6 +1,8 @@
 const executionService = require("../services/executionService");
 const roomService = require("../services/roomService");
 
+const isExecutionEnabled = () => process.env.ENABLE_CODE_EXECUTION !== "false";
+
 const executeCode = async (req, res) => {
   try {
     const { language, code, roomId } = req.body;
@@ -12,6 +14,12 @@ const executeCode = async (req, res) => {
     }
 
     await roomService.assertRoomMember(roomId, req.user.id);
+
+    if (!isExecutionEnabled()) {
+      return res.status(503).json({
+        error: "Code execution is disabled in the hosted demo. Run the project locally to use Docker execution.",
+      });
+    }
 
     const output = await executionService.executeCode(language, code);
 

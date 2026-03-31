@@ -16,6 +16,8 @@ import Participants from "../components/Participants";
 import Output from "../components/Output";
 import "../styles/editor.css";
 
+const executionEnabled = import.meta.env.VITE_ENABLE_CODE_EXECUTION !== "false";
+
 const Editor = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
@@ -398,6 +400,11 @@ const Editor = () => {
   };
 
   const handleRun = async () => {
+    if (!executionEnabled) {
+      setOutput("Code execution is disabled in the hosted demo. Use the local Docker setup to run code.");
+      return;
+    }
+
     try {
       setIsRunning(true);
       const response = await runCode(roomId, language, code);
@@ -509,6 +516,7 @@ const Editor = () => {
       <Header
         canEdit={canEdit}
         connectionStatus={connectionStatus}
+        executionEnabled={executionEnabled}
         isRunning={isRunning}
         language={language}
         onBackToDashboard={handleLeaveRoom}
@@ -528,7 +536,11 @@ const Editor = () => {
             readOnly={!canEdit}
             remoteCursors={activeCursors}
           />
-          <Output isRunning={isRunning} output={output} />
+          <Output
+            executionEnabled={executionEnabled}
+            isRunning={isRunning}
+            output={output}
+          />
         </section>
 
         <aside className="editor-sidebar">

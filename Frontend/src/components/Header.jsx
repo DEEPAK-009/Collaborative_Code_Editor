@@ -1,6 +1,7 @@
 const Header = ({
   canEdit,
   connectionStatus,
+  executionEnabled,
   isRunning,
   language,
   onBackToDashboard,
@@ -48,9 +49,13 @@ const Header = ({
           <option value="rust">Rust</option>
         </select>
 
-        <button type="button" onClick={onRun} disabled={isRunning || !canEdit}>
-          {isRunning ? "Running..." : "Run code"}
-        </button>
+        {executionEnabled ? (
+          <button type="button" onClick={onRun} disabled={isRunning || !canEdit}>
+            {isRunning ? "Running..." : "Run code"}
+          </button>
+        ) : (
+          <span className="status-pill idle">Demo mode</span>
+        )}
       </div>
 
       <div className="editor-header__section editor-header__section--right">

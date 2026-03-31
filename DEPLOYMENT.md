@@ -2,6 +2,21 @@
 
 This setup is designed for a portfolio deployment, not a high-scale production environment.
 
+## Free Demo Deployment
+
+For the easiest free deployment:
+
+- Frontend: Vercel or Netlify
+- Backend: Render, Railway, or Koyeb
+- Database: MongoDB Atlas free tier
+
+In this mode, disable live code execution:
+
+- `Backend/.env`: `ENABLE_CODE_EXECUTION=false`
+- `Frontend/.env`: `VITE_ENABLE_CODE_EXECUTION=false`
+
+That keeps auth, rooms, chat, roles, sockets, and collaborative editing online while avoiding Docker hosting requirements.
+
 ## Recommended Setup
 
 - Frontend: Vercel or Netlify
