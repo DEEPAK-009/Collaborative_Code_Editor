@@ -15,6 +15,12 @@ const CodeEditor = ({
   const monacoRef = useRef(null);
   const decorationIdsRef = useRef([]);
 
+  const onCursorMoveRef = useRef(onCursorMove);
+
+  useEffect(() => {
+    onCursorMoveRef.current = onCursorMove;
+  }, [onCursorMove]);
+
   useEffect(() => {
     if (!editorRef.current || !monacoRef.current) {
       return;
@@ -26,22 +32,25 @@ const CodeEditor = ({
       return;
     }
 
-    const decorations = remoteCursors.map((cursor, index) => {
-      const lineNumber = Math.min(
-        Math.max(cursor.position.lineNumber, 1),
-        model.getLineCount()
-      );
-      const maxColumn = model.getLineMaxColumn(lineNumber);
-      const column = Math.min(Math.max(cursor.position.column, 1), maxColumn);
-      const endColumn = Math.min(column + 1, maxColumn);
+    const decorations = remoteCursors
+      .filter((cursor) => cursor?.position?.lineNumber && cursor?.position?.column)
+      .map((cursor, index) => {
+        const lineNumber = Math.min(
+          Math.max(cursor.position.lineNumber, 1),
+          model.getLineCount()
+        );
+        const maxColumn = model.getLineMaxColumn(lineNumber);
+        const column = Math.min(Math.max(cursor.position.column, 1), maxColumn);
+        const endColumn = Math.min(column + 1, maxColumn);
 
-      return {
-        range: new monacoRef.current.Range(lineNumber, column, lineNumber, endColumn),
-        options: {
-          className: CURSOR_CLASSES[index % CURSOR_CLASSES.length],
-        },
-      };
-    });
+        return {
+          range: new monacoRef.current.Range(lineNumber, column, lineNumber, endColumn),
+          options: {
+            className: CURSOR_CLASSES[index % CURSOR_CLASSES.length],
+            hoverMessage: cursor.displayName ? { value: cursor.displayName } : undefined,
+          },
+        };
+      });
 
     decorationIdsRef.current = editorRef.current.deltaDecorations(
       decorationIdsRef.current,
@@ -54,7 +63,7 @@ const CodeEditor = ({
     monacoRef.current = monaco;
 
     editor.onDidChangeCursorPosition((event) => {
-      onCursorMove?.(event.position);
+      onCursorMoveRef.current?.(event.position);
     });
   };
 

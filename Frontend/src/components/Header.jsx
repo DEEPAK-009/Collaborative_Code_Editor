@@ -1,6 +1,7 @@
+import Logo from "./Logo";
+
 const Header = ({
   canEdit,
-  connectionStatus,
   executionEnabled,
   isRunning,
   language,
@@ -8,34 +9,16 @@ const Header = ({
   onRun,
   roomId,
   setLanguage,
-  userRole,
 }) => {
-  let statusLabel = "Reconnecting";
-
-  if (connectionStatus === "connected") {
-    statusLabel = "Live";
-  } else if (connectionStatus === "connecting") {
-    statusLabel = "Connecting";
-  }
-
   return (
     <header className="editor-header">
       <div className="editor-header__section editor-header__section--left">
-        <button
-          type="button"
-          className="icon-button"
-          onClick={onBackToDashboard}
-          aria-label="Leave room and return to dashboard"
-          title="Leave room and return to dashboard"
-        >
-          <span className="door-icon" aria-hidden="true">
-            <span />
-            <span />
-          </span>
-        </button>
         <div className="workspace-chip">
-          <p className="panel-kicker">Workspace</p>
-          <h1>{roomId}</h1>
+          <Logo size={38} showText={false} />
+          <div className="workspace-chip-info">
+            <p className="panel-kicker">Workspace</p>
+            <h1>{roomId}</h1>
+          </div>
         </div>
       </div>
 
@@ -59,12 +42,18 @@ const Header = ({
       </div>
 
       <div className="editor-header__section editor-header__section--right">
-        <div className="editor-header__meta">
-          <span className={`status-pill ${connectionStatus}`}>{statusLabel}</span>
-          <span className={`role-pill role-${userRole || "viewer"}`}>
-            {userRole || "viewer"}
+        <button
+          type="button"
+          className="exit-button"
+          onClick={onBackToDashboard}
+          aria-label="Leave room and return to dashboard"
+          title="Leave room and return to dashboard"
+        >
+          <span className="door-icon" aria-hidden="true">
+            <span />
+            <span />
           </span>
-        </div>
+        </button>
       </div>
     </header>
   );

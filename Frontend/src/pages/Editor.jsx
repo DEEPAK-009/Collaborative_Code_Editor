@@ -230,17 +230,15 @@ const Editor = () => {
     };
 
     const handleCodeUpdate = ({ code: nextCode, language: nextLanguage, updatedBy }) => {
-      if (
-        updatedBy === currentUserId &&
-        nextCode === latestCodeRef.current &&
-        (!nextLanguage || nextLanguage === latestLanguageRef.current)
-      ) {
+      if (updatedBy === currentUserId) {
         return;
       }
 
+      latestCodeRef.current = nextCode;
       setCode(nextCode);
 
       if (nextLanguage) {
+        latestLanguageRef.current = nextLanguage;
         setLanguage(nextLanguage);
       }
     };
@@ -389,6 +387,7 @@ const Editor = () => {
   };
 
   const handleEditorChange = (nextCode) => {
+    latestCodeRef.current = nextCode;
     setCode(nextCode);
     scheduleCodeSync(nextCode);
   };

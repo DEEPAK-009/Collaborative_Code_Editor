@@ -106,6 +106,7 @@ import { useContext, useEffect, useState } from "react";
 import { signupUser, googleLogin } from "../api/auth";
 import { AuthContext } from "../context/auth-context";
 import { useNavigate, Link } from "react-router-dom";
+import Logo from "../components/Logo";
 import "../styles/auth.css";
 
 const Register = () => {
@@ -164,6 +165,12 @@ const Register = () => {
   return (
     <div className="auth-page-wrapper">
       <div className="auth-card">
+        <div className="auth-brand">
+          <Link to="/" className="auth-brand-link">
+            <Logo size={42} textColor="#162032" accentColor="#1667ff" />
+          </Link>
+        </div>
+
         <div className="auth-copy">
           <p className="auth-eyebrow">Realtime development workspace</p>
           <h2 className="auth-title">

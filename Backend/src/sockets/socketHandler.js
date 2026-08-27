@@ -124,12 +124,11 @@ const socketHandler = (io) => {
 
       const room = await roomService.updateRoomCode(roomId, code, language);
 
-      io.to(roomId).emit("code-update", {
+      socket.to(roomId).emit("code-update", {
         code,
         language: room?.language || language,
         updatedBy: userId,
       });
-      await emitRoomSnapshot(io, roomId);
     });
 
     socket.on("send-message", async ({ roomId, message }) => {

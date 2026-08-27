@@ -1,15 +1,9 @@
 const Output = ({ executionEnabled, isRunning, output }) => {
   return (
     <section className="panel output-panel">
-      <div className="panel-header">
+      <div className="output-panel-header">
         <h3>Output</h3>
-        <span
-          className={`status-pill ${
-            executionEnabled ? (isRunning ? "running" : "idle") : "offline"
-          }`}
-        >
-          {executionEnabled ? (isRunning ? "Running" : "Ready") : "Disabled"}
-        </span>
+        {isRunning && <span className="output-status-running">Running...</span>}
       </div>
 
       <pre>

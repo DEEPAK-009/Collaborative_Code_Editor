@@ -18,6 +18,24 @@
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
 }
 
+.auth-brand {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.auth-brand-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.auth-brand-link:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
 .auth-copy {
   margin-bottom: 24px;
 }

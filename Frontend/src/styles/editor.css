@@ -11,25 +11,30 @@
     #f3f6fb;
 }
 
-.icon-button {
-  background-color: #ffe5e5;      /* very light red */
-  border: 1px solid #f5c2c2;      /* soft border */
-  color: #b42323;                 /* muted red text/icon */
-  
-  padding: 8px;
-  border-radius: 8px;
+.exit-button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  background-color: #fee2e2;      /* light red by default */
+  border: 1px solid #fca5a5;      /* soft red border */
+  color: #dc2626;                 /* red door icon */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.icon-button:hover {
-  background-color: #f8d7da;      /* slightly deeper on hover */
-  border-color: #e0a1a1;
-  color: #8f1d1d;
+.exit-button:hover {
+  background-color: #fecaca;      /* deeper soft red on hover */
+  border-color: #f87171;
+  color: #b91c1c;
 }
 
-.icon-button:active {
-  background-color: #f1bcbc;
+.exit-button:active {
+  background-color: #fca5a5;
 }
 
 .door-icon span {
@@ -85,6 +90,20 @@
 }
 
 .workspace-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.editor-brand-logo {
+  height: 38px;
+  width: auto;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.workspace-chip-info {
   min-width: 0;
 }
 
@@ -92,6 +111,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 1.15rem;
 }
 
 .editor-header__meta,
@@ -165,8 +185,11 @@
 }
 
 .editor-shell {
+  height: 100%;
+  width: 100%;
   min-height: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .panel {
@@ -188,6 +211,31 @@
 .output-panel {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  padding: 10px 14px;
+}
+
+.output-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.output-panel-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #172033;
+  line-height: 1.2;
+}
+
+.output-status-running {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #165dcc;
+  background: #e6f0ff;
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 
 .panel-header {
@@ -355,18 +403,6 @@
   padding: 0 14px;
 }
 
-.icon-button {
-  width: 44px;
-  min-width: 44px;
-  padding: 0;
-  border: 1px solid #d8e0ea;
-  background: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #1f2a3d;
-}
-
 .door-icon {
   position: relative;
   width: 16px;
@@ -402,8 +438,8 @@
   height: 100%;
   min-height: 0;
   overflow: auto;
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 12px;
+  padding: 12px 14px;
   background: #0f172a;
   color: #dbe7ff;
   font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
