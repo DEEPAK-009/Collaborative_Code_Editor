@@ -1,0 +1,272 @@
+/* ==========================================================================
+   SyncCode Editor Mobile & Tablet Stylesheet
+   Strictly scoped to screens <= 860px (Phones & Tablets in Portrait)
+   Zero impact on desktop (screens > 860px)
+   ========================================================================== */
+
+/* Hidden on desktop monitors by default */
+.mobile-editor-tabs {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .editor-page {
+    height: 100dvh !important;
+    min-height: 100dvh;
+    padding: 8px;
+    gap: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --------------------------------------------------------------------------
+     Header (Compact Mobile)
+     -------------------------------------------------------------------------- */
+  .editor-header {
+    min-height: 52px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .editor-header__section--left {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .workspace-chip {
+    gap: 8px;
+  }
+
+  .workspace-chip-info h1 {
+    font-size: 0.95rem !important;
+    max-width: 110px;
+  }
+
+  .workspace-chip-info .panel-kicker {
+    display: none;
+  }
+
+  .editor-header__section--center {
+    gap: 6px;
+  }
+
+  .editor-header select {
+    min-width: 105px !important;
+    min-height: 36px;
+    padding: 0 6px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .editor-header__section--center button {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .editor-header__section--right {
+    flex-shrink: 0;
+  }
+
+  .exit-button {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Mobile Tab Switcher Bar
+     -------------------------------------------------------------------------- */
+  .mobile-editor-tabs {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-around;
+    background: #ffffff;
+    border: 1px solid #d8e0ea;
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  }
+
+  .mobile-tab-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-tab-btn.active {
+    background: #1667ff;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(22, 103, 255, 0.25);
+  }
+
+  .mobile-tab-badge {
+    font-size: 0.68rem;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    color: inherit;
+    font-weight: 700;
+  }
+
+  .mobile-tab-btn:not(.active) .mobile-tab-badge {
+    background: #e2e8f0;
+    color: #475569;
+  }
+
+  /* --------------------------------------------------------------------------
+     Mobile Layout & Panel Views
+     -------------------------------------------------------------------------- */
+  .editor-layout {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  .editor-workbench,
+  .editor-sidebar {
+    display: contents !important;
+  }
+
+  /* When Code Tab is Active */
+  .mobile-show-code .editor-shell {
+    display: block !important;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    border-radius: 12px;
+  }
+
+  .mobile-show-code .output-panel,
+  .mobile-show-code .participants-panel,
+  .mobile-show-code .chat-panel {
+    display: none !important;
+  }
+
+  /* When Output Tab is Active */
+  .mobile-show-output .output-panel {
+    display: grid !important;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    border-radius: 12px;
+  }
+
+  .mobile-show-output .editor-shell,
+  .mobile-show-output .participants-panel,
+  .mobile-show-output .chat-panel {
+    display: none !important;
+  }
+
+  /* When Chat Tab is Active */
+  .mobile-show-chat .chat-panel {
+    display: grid !important;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    border-radius: 12px;
+  }
+
+  .mobile-show-chat .editor-shell,
+  .mobile-show-chat .output-panel,
+  .mobile-show-chat .participants-panel {
+    display: none !important;
+  }
+
+  /* When Participants Tab is Active */
+  .mobile-show-participants .participants-panel {
+    display: grid !important;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    border-radius: 12px;
+  }
+
+  .mobile-show-participants .editor-shell,
+  .mobile-show-participants .output-panel,
+  .mobile-show-participants .chat-panel {
+    display: none !important;
+  }
+
+  /* --------------------------------------------------------------------------
+     Chat & Panel Tweaks on Mobile
+     -------------------------------------------------------------------------- */
+  .chat-panel {
+    grid-template-rows: auto 1fr auto !important;
+  }
+
+  .chat-composer {
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  .chat-composer input {
+    min-height: 40px;
+    font-size: 0.88rem;
+  }
+
+  .chat-composer button {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 0.88rem;
+  }
+
+  .chat-bubble,
+  .empty-state {
+    max-width: 88% !important;
+    padding: 10px 12px;
+    font-size: 0.86rem;
+  }
+
+  .participant-card {
+    padding: 10px 12px;
+  }
+
+  .presence-toast-stack {
+    top: 10px;
+    width: 90%;
+    max-width: 320px;
+  }
+
+  .presence-toast {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .editor-header select {
+    min-width: 90px !important;
+  }
+
+  .mobile-tab-btn {
+    font-size: 0.76rem;
+    padding: 0 4px;
+    gap: 4px;
+  }
+}

@@ -1,0 +1,322 @@
+/* ==========================================================================
+   SyncCode Homepage Mobile & Tablet Stylesheet
+   Strictly scoped to screens <= 860px (Phones & Tablets in Portrait)
+   Zero impact on desktop (screens > 860px)
+   ========================================================================== */
+
+@media (max-width: 860px) {
+  /* --------------------------------------------------------------------------
+     Navigation Bar (Tablets & Mobile)
+     -------------------------------------------------------------------------- */
+  .site-nav {
+    padding: 10px 16px;
+  }
+
+  .nav-container {
+    gap: 10px;
+  }
+
+  .nav-menu {
+    display: none !important; /* Hide desktop anchor links on mobile */
+  }
+
+  .nav-auth-actions {
+    gap: 8px;
+  }
+
+  .auth-user-preview {
+    gap: 8px;
+  }
+
+  .user-greeting {
+    display: none; /* Hide greeting text on mobile to save space */
+  }
+
+  .btn-glow-primary,
+  .nav-login-btn,
+  .nav-logout-btn {
+    padding: 7px 12px;
+    font-size: 0.82rem;
+    min-height: 38px;
+  }
+
+  .nav-logout-btn span {
+    display: none; /* Show icon only for logout on small screens */
+  }
+
+  .nav-logout-btn {
+    padding: 7px 10px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Hero Section
+     -------------------------------------------------------------------------- */
+  .hero-section {
+    padding: 28px 16px 40px;
+  }
+
+  .hero-content {
+    margin-bottom: 24px;
+  }
+
+  .hero-announcement-pill {
+    padding: 4px 12px;
+    margin-bottom: 16px;
+    max-width: 100%;
+  }
+
+  .pill-text {
+    font-size: 0.74rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .hero-heading {
+    font-size: clamp(1.85rem, 6.5vw, 2.6rem);
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+
+  .hero-description {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+
+  .hero-metrics-bar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 14px 16px;
+    width: 100%;
+  }
+
+  .metric-divider {
+    display: none;
+  }
+
+  .metric-val {
+    font-size: 1.1rem;
+  }
+
+  .metric-lbl {
+    font-size: 0.68rem;
+  }
+
+  /* --------------------------------------------------------------------------
+     Hero Showcase Mockup (Clean Mobile Stack)
+     -------------------------------------------------------------------------- */
+  .workspace-hero-showcase {
+    margin-top: 10px;
+  }
+
+  .mockup-window-frame {
+    border-radius: 14px;
+  }
+
+  .mockup-window-header {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .mockup-room-chip {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .mockup-tab-bar {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+
+  .mockup-status-right {
+    display: none; /* Hide status tags on small mockup headers */
+  }
+
+  .mockup-editor-split {
+    grid-template-columns: 1fr !important;
+    min-height: auto;
+  }
+
+  .mockup-code-pane {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 12px 0;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .mockup-code-content pre {
+    font-size: 0.78rem;
+  }
+
+  .mockup-side-pane {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .mockup-footer-ribbon {
+    padding: 6px 12px;
+    font-size: 0.68rem;
+  }
+
+  .ribbon-right {
+    display: none;
+  }
+
+  /* --------------------------------------------------------------------------
+     Bento Grid Features
+     -------------------------------------------------------------------------- */
+  .features-bento-section {
+    padding: 50px 16px 40px;
+  }
+
+  .section-header-center {
+    margin-bottom: 32px;
+  }
+
+  .section-title {
+    font-size: clamp(1.6rem, 5vw, 2.1rem);
+  }
+
+  .section-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .bento-grid-container {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .bento-card--large {
+    grid-column: span 1 !important;
+  }
+
+  .bento-card {
+    padding: 22px 18px;
+    border-radius: 16px;
+  }
+
+  .bento-card h3 {
+    font-size: 1.18rem;
+  }
+
+  .bento-card p {
+    font-size: 0.88rem;
+  }
+
+  /* --------------------------------------------------------------------------
+     Supported Runtimes & Workflow
+     -------------------------------------------------------------------------- */
+  .languages-matrix-section {
+    padding: 40px 16px;
+  }
+
+  .matrix-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .matrix-card {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .workflow-section {
+    padding: 40px 16px;
+  }
+
+  .workflow-steps-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .workflow-step-card {
+    padding: 22px 18px;
+    border-radius: 16px;
+  }
+
+  .step-number {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Use Cases & CTA Banner
+     -------------------------------------------------------------------------- */
+  .use-cases-section {
+    padding: 40px 16px;
+  }
+
+  .use-cases-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .use-case-card {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .cta-banner-section {
+    margin: 20px auto 40px;
+    padding: 0 16px;
+  }
+
+  .cta-banner-card {
+    padding: 36px 18px;
+    border-radius: 20px;
+  }
+
+  .cta-banner-card h2 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+
+  .cta-banner-card p {
+    font-size: 0.92rem;
+    margin-bottom: 24px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Footer
+     -------------------------------------------------------------------------- */
+  .site-footer {
+    padding: 40px 16px 24px;
+  }
+
+  .footer-top {
+    grid-template-columns: 1fr !important;
+    gap: 28px;
+    margin-bottom: 28px;
+  }
+
+  .footer-links-group {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .footer-pills {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-metrics-bar {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px;
+  }
+
+  .metric-val {
+    font-size: 1rem;
+  }
+
+  .hero-heading {
+    font-size: 1.75rem;
+  }
+}

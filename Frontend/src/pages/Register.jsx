@@ -108,6 +108,7 @@ import { AuthContext } from "../context/auth-context";
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../components/Logo";
 import "../styles/auth.css";
+import "../styles/auth.mobile.css";
 
 const Register = () => {
   const [formData, setFormData] = useState({

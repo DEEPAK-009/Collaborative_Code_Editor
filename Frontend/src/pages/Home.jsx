@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../context/auth-context";
 import Logo from "../components/Logo";
 import "../styles/home.css";
+import "../styles/home.mobile.css";
 
 const Home = () => {
   const { logout, user } = useContext(AuthContext);

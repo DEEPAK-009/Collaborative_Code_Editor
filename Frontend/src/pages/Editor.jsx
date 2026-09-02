@@ -15,6 +15,7 @@ import Chat from "../components/Chat";
 import Participants from "../components/Participants";
 import Output from "../components/Output";
 import "../styles/editor.css";
+import "../styles/editor.mobile.css";
 
 const executionEnabled = import.meta.env.VITE_ENABLE_CODE_EXECUTION !== "false";
 
@@ -24,6 +25,7 @@ const Editor = () => {
   const location = useLocation();
   const { token, user } = useContext(AuthContext);
 
+  const [mobileTab, setMobileTab] = useState("code");
   const [room, setRoom] = useState(location.state?.initialRoom || null);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -525,7 +527,51 @@ const Editor = () => {
         userRole={currentMember?.role}
       />
 
-      <main className="editor-layout">
+      {/* Mobile Tab Navigation Bar (Visible only on screens <= 860px) */}
+      <div className="mobile-editor-tabs" role="tablist" aria-label="Editor Views">
+        <button
+          type="button"
+          className={`mobile-tab-btn ${mobileTab === "code" ? "active" : ""}`}
+          onClick={() => setMobileTab("code")}
+          role="tab"
+          aria-selected={mobileTab === "code"}
+        >
+          <span>💻 Code</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-tab-btn ${mobileTab === "output" ? "active" : ""}`}
+          onClick={() => setMobileTab("output")}
+          role="tab"
+          aria-selected={mobileTab === "output"}
+        >
+          <span>🐳 Output</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-tab-btn ${mobileTab === "chat" ? "active" : ""}`}
+          onClick={() => setMobileTab("chat")}
+          role="tab"
+          aria-selected={mobileTab === "chat"}
+        >
+          <span>💬 Chat</span>
+          {messages.length > 0 ? (
+            <span className="mobile-tab-badge">{messages.length}</span>
+          ) : null}
+        </button>
+        <button
+          type="button"
+          className={`mobile-tab-btn ${mobileTab === "participants" ? "active" : ""}`}
+          onClick={() => setMobileTab("participants")}
+          role="tab"
+          aria-selected={mobileTab === "participants"}
+        >
+          <span>👥 Team</span>
+          <span className="mobile-tab-badge">{room?.members?.length || 1}</span>
+        </button>
+      </div>
+
+      <main className={`editor-layout mobile-show-${mobileTab}`}>
         <section className="editor-workbench">
           <CodeEditor
             code={code}

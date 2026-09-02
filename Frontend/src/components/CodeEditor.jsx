@@ -84,6 +84,8 @@ const CodeEditor = ({
           smoothScrolling: true,
           scrollBeyondLastLine: false,
           tabSize: 2,
+          wordWrap: "on",
+          lineNumbersMinChars: 3,
           readOnly,
           padding: { top: 18 },
         }}

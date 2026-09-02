@@ -4,6 +4,7 @@ import { createRoom, joinRoom } from "../api/room";
 import { AuthContext } from "../context/auth-context";
 import Logo from "../components/Logo";
 import "../styles/dashboard.css";
+import "../styles/dashboard.mobile.css";
 
 const Dashboard = () => {
   const { logout, updateProfile, user } = useContext(AuthContext);

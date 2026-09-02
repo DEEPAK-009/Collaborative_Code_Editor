@@ -1,0 +1,153 @@
+/* ==========================================================================
+   SyncCode Dashboard Mobile & Tablet Stylesheet
+   Strictly scoped to screens <= 860px (Phones & Tablets in Portrait)
+   Zero impact on desktop (screens > 860px)
+   ========================================================================== */
+
+@media (max-width: 860px) {
+  .dashboard-wrapper {
+    padding: 12px;
+  }
+
+  .dashboard-shell {
+    gap: 14px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Topbar (Mobile & Tablet)
+     -------------------------------------------------------------------------- */
+  .dashboard-topbar {
+    padding: 10px 14px;
+    border-radius: 14px;
+    gap: 10px;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dashboard-brand-header {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .dashboard-badge-pill {
+    display: none; /* Hide 'Workspace Hub' pill on small screens */
+  }
+
+  .dashboard-brand-divider {
+    display: none;
+  }
+
+  .dashboard-topbar-actions {
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .ghost-button {
+    padding: 0 12px;
+    min-height: 38px;
+    font-size: 0.82rem;
+  }
+
+  .exit-button {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Profile Section
+     -------------------------------------------------------------------------- */
+  .dashboard-profile-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+    gap: 16px;
+  }
+
+  .profile-card-main {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .profile-avatar-badge {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 14px;
+    font-size: 1.15rem;
+  }
+
+  .profile-title-row h2 {
+    font-size: 1.25rem;
+  }
+
+  .profile-subtext-row {
+    font-size: 0.82rem;
+    gap: 8px;
+  }
+
+  .profile-input-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .profile-input-row input {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Action Cards (Create & Join Room)
+     -------------------------------------------------------------------------- */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .dashboard-card {
+    padding: 22px 18px;
+    border-radius: 16px;
+  }
+
+  .dashboard-title {
+    font-size: 1.3rem;
+  }
+
+  .dashboard-card-desc {
+    font-size: 0.88rem;
+    margin-bottom: 18px;
+  }
+
+  .dashboard-btn {
+    min-height: 48px;
+    font-size: 0.96rem;
+    border-radius: 12px;
+  }
+
+  .room-input-container {
+    gap: 10px;
+  }
+
+  .room-code-input {
+    min-height: 46px;
+    font-size: 1.05rem;
+  }
+
+  .room-inline-error {
+    font-size: 0.82rem;
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-wrapper {
+    padding: 8px;
+  }
+
+  .profile-card-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
