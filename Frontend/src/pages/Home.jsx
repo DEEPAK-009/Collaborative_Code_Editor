@@ -5,7 +5,13 @@ import Logo from "../components/Logo";
 import "../styles/home.css";
 
 const Home = () => {
-  const { user } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
+
+  const handleSignOut = () => {
+    if (window.confirm("Sign out of CollabX?")) {
+      logout();
+    }
+  };
 
   return (
     <div className="home-root">
@@ -41,6 +47,20 @@ const Home = () => {
                     <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
                 </Link>
+                <button
+                  type="button"
+                  className="nav-logout-btn"
+                  onClick={handleSignOut}
+                  title="Sign out of CollabX"
+                  aria-label="Sign out of CollabX"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  <span>Sign Out</span>
+                </button>
               </div>
             ) : (
               <>
@@ -76,21 +96,6 @@ const Home = () => {
             CollabX gives developers, engineering teams, interviewers, and study groups a unified collaborative workspace.
             Experience sub-millisecond multi-cursor editing, sandboxed Docker compilation for 6+ languages, in-room team chat, and role-based permissions.
           </p>
-
-          <div className="hero-cta-group">
-            <Link to={user ? "/dashboard" : "/register"} className="btn-cta-large btn-cta-primary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              <span>{user ? "Launch Dashboard" : "Start Coding Free"}</span>
-            </Link>
-            <a href="#features" className="btn-cta-large btn-cta-secondary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              <span>Explore Features</span>
-            </a>
-          </div>
 
           {/* Quick Metrics Bar */}
           <div className="hero-metrics-bar">

@@ -448,17 +448,38 @@
   min-height: 46px;
   border-radius: 12px;
   border: 1px solid #d8e0ea;
-  background: #ffffff;
-  color: #172033;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #1667ff;
   padding: 0 14px;
   font-size: 0.95rem;
+  color-scheme: light;
   transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-input::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+  opacity: 1;
 }
 
 .dashboard-input:focus {
   outline: none;
   border-color: #bfd4ff;
   box-shadow: 0 0 0 4px rgba(22, 103, 255, 0.08);
+  background-color: #ffffff !important;
+}
+
+.dashboard-input:-webkit-autofill,
+.dashboard-input:-webkit-autofill:hover, 
+.dashboard-input:-webkit-autofill:focus, 
+.dashboard-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #1667ff !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .dashboard-btn,

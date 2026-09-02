@@ -184,32 +184,46 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <input
+            type="text"
             name="displayName"
             placeholder="Display name"
+            value={formData.displayName}
             onChange={handleChange}
+            required
+            autoComplete="name"
             className="auth-input"
           />
 
           <input
+            type="email"
             name="email"
             placeholder="developer@email.com"
+            value={formData.email}
             onChange={handleChange}
+            required
+            autoComplete="email"
             className="auth-input"
           />
 
           <input
+            type="password"
             name="password"
-            type="password"
             placeholder="Create Password"
+            value={formData.password}
             onChange={handleChange}
+            required
+            autoComplete="new-password"
             className="auth-input"
           />
 
           <input
-            name="confirmPassword"
             type="password"
+            name="confirmPassword"
             placeholder="Confirm Password"
+            value={formData.confirmPassword}
             onChange={handleChange}
+            required
+            autoComplete="new-password"
             className="auth-input"
           />
 

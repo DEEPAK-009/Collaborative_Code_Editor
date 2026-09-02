@@ -68,17 +68,24 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <input
+            type="email"
             name="email"
             placeholder="developer@email.com"
+            value={formData.email}
             onChange={handleChange}
+            required
+            autoComplete="email"
             className="auth-input"
           />
 
           <input
-            name="password"
             type="password"
+            name="password"
             placeholder="••••••••"
+            value={formData.password}
             onChange={handleChange}
+            required
+            autoComplete="current-password"
             className="auth-input"
           />
 
