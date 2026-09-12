@@ -17,8 +17,6 @@ const Header = ({
   executionEnabled,
   isRunning,
   language,
-  memberCount = 1,
-  messageCount = 0,
   onBackToDashboard,
   onRun,
   onToggleDrawer,

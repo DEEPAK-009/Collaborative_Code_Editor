@@ -1,39 +1,34 @@
 /* ==========================================================================
-   SyncCode Auth Mobile & Tablet Stylesheet (Login & Register)
-   Strictly scoped to screens <= 860px
+   CollabX Auth Mobile & Tablet Stylesheet (Login & Register)
+   Strictly scoped to screens <= 640px
    ========================================================================== */
 
-@media (max-width: 860px) {
-  .auth-page {
-    padding: 16px;
-    align-items: center;
-    justify-content: center;
+@media (max-width: 640px) {
+  .auth-page-wrapper {
+    padding: 16px 12px;
   }
 
-  .auth-card {
-    width: 100% !important;
-    max-width: 440px;
-    padding: 28px 20px;
-    border-radius: 18px;
-    margin: 0 auto;
+  .auth-shell {
+    gap: 12px;
   }
 
-  .auth-card h1 {
-    font-size: 1.5rem;
+  .auth-card,
+  .demo-accounts-card {
+    padding: 24px 18px;
+    border-radius: 20px;
   }
 
-  .auth-card p {
-    font-size: 0.88rem;
+  .auth-title {
+    font-size: 1.55rem;
   }
 
-  .auth-input {
+  .auth-input,
+  .auth-btn-primary,
+  .auth-btn-google {
     min-height: 46px;
-    font-size: 0.92rem;
-  }
-
-  .auth-btn,
-  .google-auth-btn {
-    min-height: 46px;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
   }
 }
+
+
+

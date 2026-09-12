@@ -46,22 +46,35 @@ export const readStoredUser = () => {
 };
 
 export const persistAuth = ({ token, user }) => {
-  if (token) {
-    AUTH_STORAGE.setItem("token", token);
-    LEGACY_STORAGE.removeItem("token");
-  }
+  try {
+    if (token) {
+      AUTH_STORAGE.setItem("token", token);
+      LEGACY_STORAGE.removeItem("token");
+    }
 
-  if (user) {
-    AUTH_STORAGE.setItem("user", JSON.stringify(user));
-    LEGACY_STORAGE.removeItem("user");
+    if (user) {
+      AUTH_STORAGE.setItem("user", JSON.stringify(user));
+      LEGACY_STORAGE.removeItem("user");
+    }
+  } catch {
+    // Session storage can be unavailable in restricted browser contexts.
   }
 };
 
 export const clearPersistedAuth = () => {
-  AUTH_STORAGE.removeItem("token");
-  AUTH_STORAGE.removeItem("user");
-  AUTH_STORAGE.removeItem("activeRoomId");
-  LEGACY_STORAGE.removeItem("token");
-  LEGACY_STORAGE.removeItem("user");
-  LEGACY_STORAGE.removeItem("activeRoomId");
+  try {
+    AUTH_STORAGE.removeItem("token");
+    AUTH_STORAGE.removeItem("user");
+    AUTH_STORAGE.removeItem("activeRoomId");
+  } catch {
+    // Continue clearing legacy values if session storage is unavailable.
+  }
+
+  try {
+    LEGACY_STORAGE.removeItem("token");
+    LEGACY_STORAGE.removeItem("user");
+    LEGACY_STORAGE.removeItem("activeRoomId");
+  } catch {
+    // Ignore storage cleanup failures; in-memory auth is still cleared.
+  }
 };

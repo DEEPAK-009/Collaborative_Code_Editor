@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth-context";
 import Logo from "../components/Logo";
 import "../styles/home.css";
@@ -7,10 +7,13 @@ import "../styles/home.mobile.css";
 
 const Home = () => {
   const { logout, user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSignOut = () => {
-    if (window.confirm("Sign out of CollabX?")) {
+    const confirmed = window.confirm("Are you sure you want to sign out of CollabX?");
+    if (confirmed) {
       logout();
+      navigate("/", { replace: true });
     }
   };
 
@@ -134,26 +137,7 @@ const Home = () => {
         </div>
 
         <div className="bento-grid-container">
-          {/* Bento Card 1 - Realtime Synchronization */}
-          <div className="bento-card bento-card--large bento-glow-cyan">
-            <div className="bento-card-badge">⚡ Sub-millisecond</div>
-            <div className="bento-icon-box cyan-bg">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-              </svg>
-            </div>
-            <h3>Realtime Operational Synchronization</h3>
-            <p>
-              Collaborative coding with zero lag. Multi-user cursor tracking, active selection highlights, and simultaneous text edits stay synchronized over robust WebSocket connections.
-            </p>
-            <div className="bento-visual-preview cursor-sync-preview">
-              <div className="sync-pill-tag tag-blue">Deepak: Ln 24, Col 12</div>
-              <div className="sync-pill-tag tag-purple">Sarah: Ln 38, Col 5</div>
-              <div className="sync-pill-tag tag-emerald">Alex: Ln 12, Col 80</div>
-            </div>
-          </div>
-
-          {/* Bento Card 2 - Docker Sandbox Execution */}
+          {/* Bento Card 1 - Docker Sandbox Execution */}
           <div className="bento-card bento-card--large bento-glow-emerald">
             <div className="bento-card-badge">🐳 100% Isolated</div>
             <div className="bento-icon-box emerald-bg">
