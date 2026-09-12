@@ -1,153 +1,105 @@
 /* ==========================================================================
-   SyncCode Dashboard Mobile & Tablet Stylesheet
+   CollabX Dashboard Mobile & Tablet Stylesheet
    Strictly scoped to screens <= 860px (Phones & Tablets in Portrait)
    Zero impact on desktop (screens > 860px)
    ========================================================================== */
 
 @media (max-width: 860px) {
   .dashboard-wrapper {
-    padding: 12px;
+    padding: 16px 12px;
+    align-items: flex-start;
   }
 
   .dashboard-shell {
     gap: 14px;
   }
 
-  /* --------------------------------------------------------------------------
-     Topbar (Mobile & Tablet)
-     -------------------------------------------------------------------------- */
-  .dashboard-topbar {
-    padding: 10px 14px;
-    border-radius: 14px;
-    gap: 10px;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-between;
+  .dashboard-top-nav {
+    padding: 0 4px;
   }
 
-  .dashboard-brand-header {
-    gap: 8px;
-    min-width: 0;
+  .dashboard-home-nav-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
   }
 
-  .dashboard-badge-pill {
-    display: none; /* Hide 'Workspace Hub' pill on small screens */
+  .dashboard-layout-card {
+    grid-template-columns: 1fr;
+    border-radius: 18px;
+    min-height: auto;
   }
 
-  .dashboard-brand-divider {
-    display: none;
+  .dashboard-sidebar {
+    padding: 24px 20px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    gap: 20px;
   }
 
-  .dashboard-topbar-actions {
-    gap: 8px;
-    flex-shrink: 0;
+  .dashboard-sidebar__top {
+    gap: 18px;
   }
 
-  .ghost-button {
-    padding: 0 12px;
-    min-height: 38px;
-    font-size: 0.82rem;
+  .dashboard-user-info {
+    text-align: left;
+    padding: 4px 0;
   }
 
-  .exit-button {
-    width: 38px;
-    min-width: 38px;
-    height: 38px;
+  .dashboard-main-area {
+    padding: 24px 20px;
+    gap: 24px;
   }
 
-  /* --------------------------------------------------------------------------
-     Profile Section
-     -------------------------------------------------------------------------- */
-  .dashboard-profile-card {
-    padding: 18px 16px;
-    border-radius: 16px;
+  .dashboard-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-hero-desc {
+    font-size: 0.88rem;
+  }
+
+  .dashboard-cards-grid {
+    grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .profile-card-main {
-    flex-direction: row;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .profile-avatar-badge {
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
-    border-radius: 14px;
-    font-size: 1.15rem;
-  }
-
-  .profile-title-row h2 {
-    font-size: 1.25rem;
-  }
-
-  .profile-subtext-row {
-    font-size: 0.82rem;
-    gap: 8px;
-  }
-
-  .profile-input-row {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .profile-input-row input {
-    width: 100%;
-    min-height: 44px;
-  }
-
-  /* --------------------------------------------------------------------------
-     Action Cards (Create & Join Room)
-     -------------------------------------------------------------------------- */
-  .dashboard-grid {
-    grid-template-columns: 1fr !important;
-    gap: 14px;
-  }
-
-  .dashboard-card {
-    padding: 22px 18px;
+  .dashboard-action-card {
+    padding: 22px 20px;
     border-radius: 16px;
+    min-height: auto;
+    gap: 20px;
   }
 
-  .dashboard-title {
-    font-size: 1.3rem;
+  .dashboard-modal-dialog {
+    width: 95%;
+    max-width: 100%;
+    border-radius: 14px;
   }
 
-  .dashboard-card-desc {
-    font-size: 0.88rem;
-    margin-bottom: 18px;
+  .dashboard-modal-header {
+    padding: 16px 18px;
   }
 
-  .dashboard-btn {
-    min-height: 48px;
-    font-size: 0.96rem;
-    border-radius: 12px;
+  .dashboard-modal-body {
+    padding: 18px;
   }
 
-  .room-input-container {
-    gap: 10px;
-  }
-
-  .room-code-input {
-    min-height: 46px;
-    font-size: 1.05rem;
-  }
-
-  .room-inline-error {
-    font-size: 0.82rem;
-    padding: 8px 10px;
+  .dashboard-modal-footer {
+    padding: 14px 18px;
   }
 }
 
 @media (max-width: 480px) {
   .dashboard-wrapper {
-    padding: 8px;
+    padding: 10px 8px;
   }
 
-  .profile-card-main {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+  .dashboard-sidebar,
+  .dashboard-main-area {
+    padding: 18px 16px;
+  }
+
+  .dashboard-modal-backdrop {
+    padding: 12px;
   }
 }

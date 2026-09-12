@@ -24,9 +24,14 @@
      Header (Compact Mobile)
      -------------------------------------------------------------------------- */
   .editor-header {
-    min-height: 52px;
-    padding: 8px 12px;
+    min-height: 48px;
+    height: 48px;
+    padding: 0 10px;
     border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(18, 24, 38, 0.9);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     display: flex !important;
     align-items: center;
     justify-content: space-between;
@@ -37,18 +42,28 @@
   .editor-header__section--left {
     min-width: 0;
     flex: 1;
-  }
-
-  .workspace-chip {
     gap: 8px;
   }
 
-  .workspace-chip-info h1 {
-    font-size: 0.95rem !important;
-    max-width: 110px;
+  .editor-brand-link {
+    display: none;
   }
 
-  .workspace-chip-info .panel-kicker {
+  .editor-header-divider {
+    display: none;
+  }
+
+  .workspace-chip {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+
+  .workspace-room-id {
+    font-size: 0.85rem !important;
+    max-width: 90px;
+  }
+
+  .workspace-chip__label {
     display: none;
   }
 
@@ -56,29 +71,47 @@
     gap: 6px;
   }
 
-  .editor-header select {
-    min-width: 105px !important;
-    min-height: 36px;
-    padding: 0 6px;
+  .language-select-btn {
+    min-height: 34px;
+    height: 34px;
+    padding: 0 8px;
     font-size: 0.8rem;
     border-radius: 8px;
   }
 
-  .editor-header__section--center button {
-    min-height: 36px;
-    padding: 0 10px;
-    font-size: 0.8rem;
+  .lang-code-icon {
+    display: none;
+  }
+
+  .run-btn {
+    min-height: 34px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 0.82rem;
     border-radius: 8px;
   }
 
   .editor-header__section--right {
     flex-shrink: 0;
+    gap: 8px;
   }
 
-  .exit-button {
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
+  .drawer-btn-label {
+    display: none;
+  }
+
+  .header-drawer-btn {
+    height: 34px;
+    padding: 0 8px;
+    border-radius: 8px;
+    gap: 4px;
+  }
+
+  .editor-header .exit-button {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
     border-radius: 8px;
   }
 
@@ -89,13 +122,13 @@
     display: flex !important;
     align-items: center;
     justify-content: space-around;
-    background: #ffffff;
-    border: 1px solid #d8e0ea;
-    border-radius: 12px;
-    padding: 4px;
+    background: #1e1e1e;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 3px;
     gap: 4px;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   }
 
   .mobile-tab-btn {
@@ -104,12 +137,12 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    min-height: 34px;
+    min-height: 32px;
     padding: 0 8px;
-    border-radius: 8px;
+    border-radius: 6px;
     border: none;
     background: transparent;
-    color: #64748b;
+    color: #94a3b8;
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
@@ -117,9 +150,9 @@
   }
 
   .mobile-tab-btn.active {
-    background: #1667ff;
+    background: #2563eb;
     color: #ffffff;
-    box-shadow: 0 2px 8px rgba(22, 103, 255, 0.25);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
   }
 
   .mobile-tab-badge {
@@ -132,8 +165,8 @@
   }
 
   .mobile-tab-btn:not(.active) .mobile-tab-badge {
-    background: #e2e8f0;
-    color: #475569;
+    background: #334155;
+    color: #cbd5e1;
   }
 
   /* --------------------------------------------------------------------------
@@ -148,9 +181,8 @@
     gap: 0;
   }
 
-  .editor-workbench,
-  .editor-sidebar {
-    display: contents !important;
+  .editor-resizer {
+    display: none !important;
   }
 
   /* When Code Tab is Active */
@@ -162,24 +194,20 @@
     border-radius: 12px;
   }
 
-  .mobile-show-code .output-panel,
-  .mobile-show-code .participants-panel,
-  .mobile-show-code .chat-panel {
+  .mobile-show-code .editor-output-section {
     display: none !important;
   }
 
   /* When Output Tab is Active */
-  .mobile-show-output .output-panel {
-    display: grid !important;
+  .mobile-show-output .editor-output-section {
+    display: flex !important;
     flex: 1;
     min-height: 0;
     height: 100%;
     border-radius: 12px;
   }
 
-  .mobile-show-output .editor-shell,
-  .mobile-show-output .participants-panel,
-  .mobile-show-output .chat-panel {
+  .mobile-show-output .editor-shell {
     display: none !important;
   }
 
@@ -256,6 +284,18 @@
   .presence-toast {
     padding: 8px 12px;
     font-size: 0.8rem;
+  }
+
+  .drawer-panel {
+    top: auto;
+    bottom: 58px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: 72vh;
+    border-radius: 14px;
   }
 }
 

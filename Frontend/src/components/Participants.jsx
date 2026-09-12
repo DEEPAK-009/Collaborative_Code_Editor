@@ -1,5 +1,22 @@
 import { useEffect, useState } from "react";
 
+const AVATAR_COLORS = [
+  "#2563eb",
+  "#059669",
+  "#7c3aed",
+  "#d97706",
+  "#db2777",
+  "#0891b2",
+];
+
+const getAvatarColor = (name = "") => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+};
+
 const Participants = ({
   actionUserId,
   currentUserId,
@@ -33,27 +50,28 @@ const Participants = ({
 
   return (
     <section className="panel participants-panel">
-      <div className="panel-header">
-        <div>
-          <p className="panel-kicker">Participants</p>
-          <h3>{members.length} collaborators</h3>
-        </div>
-      </div>
-
       <div className="participant-list">
         {members.map((member) => {
           const isCurrentUser = member.userId === currentUserId;
           const isLoading = actionUserId === member.userId;
           const isMenuOpen = openMenuUserId === member.userId;
+          const avatarColor = getAvatarColor(member.displayName || "User");
+          const initial = (member.displayName || "U")[0]?.toUpperCase();
 
           return (
-            <article key={member.userId} className="participant-card">
+            <article key={member.userId} className={`participant-card ${isCurrentUser ? "participant-card--self" : ""}`}>
               <div className="participant-main">
+                <div className="participant-avatar" style={{ backgroundColor: avatarColor }}>
+                  {initial}
+                  <span className="participant-status-dot" />
+                </div>
+
                 <div className="participant-info">
                   <div className="participant-title-row">
                     <h4>{member.displayName}</h4>
                     {isCurrentUser ? <span className="self-badge">You</span> : null}
                   </div>
+                  <span className="participant-role-subtext">{member.role}</span>
                 </div>
 
                 <div className="participant-badges">
@@ -73,6 +91,7 @@ const Participants = ({
 
                       {isMenuOpen ? (
                         <div className="participant-menu">
+                          <label className="participant-menu-label">Change Role</label>
                           <select
                             value={member.role}
                             onChange={(event) => {
@@ -86,18 +105,18 @@ const Participants = ({
                           </select>
                           <button
                             type="button"
-                            className="ghost-button"
+                            className="participant-menu-action"
                             disabled={isLoading}
                             onClick={() => {
                               onTransferOwnership(member.userId);
                               setOpenMenuUserId(null);
                             }}
                           >
-                            Transfer owner
+                            Transfer Owner
                           </button>
                           <button
                             type="button"
-                            className="danger-button"
+                            className="participant-menu-action participant-menu-action--danger"
                             disabled={isLoading}
                             onClick={() => {
                               onRemoveUser(member.userId);

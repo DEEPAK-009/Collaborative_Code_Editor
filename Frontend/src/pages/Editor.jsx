@@ -26,6 +26,7 @@ const Editor = () => {
   const { token, user } = useContext(AuthContext);
 
   const [mobileTab, setMobileTab] = useState("code");
+  const [activeDrawer, setActiveDrawer] = useState(null);
   const [room, setRoom] = useState(location.state?.initialRoom || null);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -62,6 +63,86 @@ const Editor = () => {
       ),
     [currentUserId, remoteCursors]
   );
+
+  const [splitRatio, setSplitRatio] = useState(() => {
+    try {
+      const saved = localStorage.getItem("collabx_split_ratio");
+      return saved ? Math.min(Math.max(Number(saved), 20), 80) : 55;
+    } catch {
+      return 55;
+    }
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const layoutRef = useRef(null);
+
+  const handleToggleDrawer = (drawerName) => {
+    setActiveDrawer((current) => (current === drawerName ? null : drawerName));
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setActiveDrawer(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Resizable Splitter Handlers (Left/Right Dragging)
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleTouchStart = () => {
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e) => {
+      if (!layoutRef.current) return;
+      const rect = layoutRef.current.getBoundingClientRect();
+      const newWidth = e.clientX - rect.left;
+      const newRatio = (newWidth / rect.width) * 100;
+      const clampedRatio = Math.min(Math.max(newRatio, 20), 80);
+      setSplitRatio(clampedRatio);
+    };
+
+    const handleTouchMove = (e) => {
+      if (!layoutRef.current || !e.touches[0]) return;
+      const rect = layoutRef.current.getBoundingClientRect();
+      const newWidth = e.touches[0].clientX - rect.left;
+      const newRatio = (newWidth / rect.width) * 100;
+      const clampedRatio = Math.min(Math.max(newRatio, 20), 80);
+      setSplitRatio(clampedRatio);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      try {
+        localStorage.setItem("collabx_split_ratio", splitRatio);
+      } catch {
+        // ignore
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleMouseUp);
+    window.addEventListener("touchcancel", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleMouseUp);
+      window.removeEventListener("touchcancel", handleMouseUp);
+    };
+  }, [isDragging, splitRatio]);
 
   useEffect(() => {
     latestCodeRef.current = code;
@@ -515,64 +596,74 @@ const Editor = () => {
       ) : null}
 
       <Header
+        activeDrawer={activeDrawer}
         canEdit={canEdit}
-        connectionStatus={connectionStatus}
         executionEnabled={executionEnabled}
         isRunning={isRunning}
         language={language}
+        memberCount={room?.members?.length || 1}
+        messageCount={messages.length}
         onBackToDashboard={handleLeaveRoom}
         onRun={handleRun}
+        onToggleDrawer={handleToggleDrawer}
         roomId={roomId}
         setLanguage={handleLanguageChange}
-        userRole={currentMember?.role}
       />
 
       {/* Mobile Tab Navigation Bar (Visible only on screens <= 860px) */}
       <div className="mobile-editor-tabs" role="tablist" aria-label="Editor Views">
         <button
           type="button"
-          className={`mobile-tab-btn ${mobileTab === "code" ? "active" : ""}`}
-          onClick={() => setMobileTab("code")}
+          className={`mobile-tab-btn ${mobileTab === "code" && !activeDrawer ? "active" : ""}`}
+          onClick={() => {
+            setActiveDrawer(null);
+            setMobileTab("code");
+          }}
           role="tab"
-          aria-selected={mobileTab === "code"}
+          aria-selected={mobileTab === "code" && !activeDrawer}
         >
           <span>💻 Code</span>
         </button>
         <button
           type="button"
-          className={`mobile-tab-btn ${mobileTab === "output" ? "active" : ""}`}
-          onClick={() => setMobileTab("output")}
+          className={`mobile-tab-btn ${mobileTab === "output" && !activeDrawer ? "active" : ""}`}
+          onClick={() => {
+            setActiveDrawer(null);
+            setMobileTab("output");
+          }}
           role="tab"
-          aria-selected={mobileTab === "output"}
+          aria-selected={mobileTab === "output" && !activeDrawer}
         >
           <span>🐳 Output</span>
         </button>
         <button
           type="button"
-          className={`mobile-tab-btn ${mobileTab === "chat" ? "active" : ""}`}
-          onClick={() => setMobileTab("chat")}
+          className={`mobile-tab-btn ${activeDrawer === "chat" ? "active" : ""}`}
+          onClick={() => handleToggleDrawer("chat")}
           role="tab"
-          aria-selected={mobileTab === "chat"}
+          aria-selected={activeDrawer === "chat"}
         >
           <span>💬 Chat</span>
-          {messages.length > 0 ? (
-            <span className="mobile-tab-badge">{messages.length}</span>
-          ) : null}
         </button>
         <button
           type="button"
-          className={`mobile-tab-btn ${mobileTab === "participants" ? "active" : ""}`}
-          onClick={() => setMobileTab("participants")}
+          className={`mobile-tab-btn ${activeDrawer === "participants" ? "active" : ""}`}
+          onClick={() => handleToggleDrawer("participants")}
           role="tab"
-          aria-selected={mobileTab === "participants"}
+          aria-selected={activeDrawer === "participants"}
         >
           <span>👥 Team</span>
-          <span className="mobile-tab-badge">{room?.members?.length || 1}</span>
         </button>
       </div>
 
-      <main className={`editor-layout mobile-show-${mobileTab}`}>
-        <section className="editor-workbench">
+      <main
+        ref={layoutRef}
+        className={`editor-layout mobile-show-${mobileTab} ${isDragging ? "is-resizing" : ""}`}
+      >
+        <section
+          className="editor-shell"
+          style={{ flex: `0 0 calc(${splitRatio}% - 6px)` }}
+        >
           <CodeEditor
             code={code}
             language={language}
@@ -581,33 +672,106 @@ const Editor = () => {
             readOnly={!canEdit}
             remoteCursors={activeCursors}
           />
+        </section>
+
+        <div
+          className="editor-resizer"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          role="separator"
+          aria-valuenow={Math.round(splitRatio)}
+          aria-valuemin={20}
+          aria-valuemax={80}
+          aria-label="Drag left or right to resize editor and output panels"
+          title="Drag left or right to resize panels"
+        >
+          <div className="resizer-handle" />
+        </div>
+
+        <section
+          className="editor-output-section"
+          style={{ flex: `0 0 calc(${100 - splitRatio}% - 6px)` }}
+        >
           <Output
             executionEnabled={executionEnabled}
             isRunning={isRunning}
             output={output}
           />
         </section>
-
-        <aside className="editor-sidebar">
-          <Participants
-            actionUserId={actionUserId}
-            currentUserId={currentUserId}
-            isOwner={isOwner}
-            members={room?.members || []}
-            onChangeRole={handleRoleChange}
-            onRemoveUser={handleRemoveUser}
-            onTransferOwnership={handleTransferOwnership}
-          />
-          <Chat
-            currentUserId={currentUserId}
-            input={chatInput}
-            isConnected={connectionStatus === "connected"}
-            messages={messages}
-            onInputChange={setChatInput}
-            onSend={handleSendMessage}
-          />
-        </aside>
       </main>
+
+      {/* Floating Pop-up for Team & Chat */}
+      {activeDrawer ? (
+        <div
+          className="drawer-overlay"
+          onClick={() => setActiveDrawer(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeDrawer === "participants" ? "Team Participants" : "Room Chat"}
+        >
+          <aside className="drawer-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-header">
+              <div className="drawer-title-group">
+                <div className="drawer-icon-badge">
+                  {activeDrawer === "participants" ? (
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  ) : (
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                      <circle cx="8.5" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                      <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                      <circle cx="15.5" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                    </svg>
+                  )}
+                </div>
+                <div className="drawer-title-info">
+                  <h3>{activeDrawer === "participants" ? "Team" : "Room Chat"}</h3>
+                  <span className={`status-pill ${activeDrawer === "chat" ? (connectionStatus === "connected" ? "online" : "offline") : "idle"}`}>
+                    {activeDrawer === "participants" ? `${room?.members?.length || 1} online` : (connectionStatus === "connected" ? "Live" : "Offline")}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="drawer-close-btn"
+                onClick={() => setActiveDrawer(null)}
+                aria-label="Close"
+                title="Close (Esc)"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="drawer-body">
+              {activeDrawer === "participants" ? (
+                <Participants
+                  actionUserId={actionUserId}
+                  currentUserId={currentUserId}
+                  isOwner={isOwner}
+                  members={room?.members || []}
+                  onChangeRole={handleRoleChange}
+                  onRemoveUser={handleRemoveUser}
+                  onTransferOwnership={handleTransferOwnership}
+                />
+              ) : (
+                <Chat
+                  currentUserId={currentUserId}
+                  input={chatInput}
+                  isConnected={connectionStatus === "connected"}
+                  messages={messages}
+                  onInputChange={setChatInput}
+                  onSend={handleSendMessage}
+                />
+              )}
+            </div>
+          </aside>
+        </div>
+      ) : null}
 
       {error ? <div className="editor-toast">{error}</div> : null}
     </div>

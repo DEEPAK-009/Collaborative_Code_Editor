@@ -1,18 +1,29 @@
 const Output = ({ executionEnabled, isRunning, output }) => {
   return (
-    <section className="panel output-panel">
-      <div className="output-panel-header">
-        <h3>Output</h3>
-        {isRunning && <span className="output-status-running">Running...</span>}
+    <div className="output-shell">
+      <div className="output-shell-header">
+        <div className="output-title-chip">
+          <span className="output-terminal-dot" />
+          <span className="output-shell-title">Output</span>
+        </div>
+        {isRunning ? (
+          <div className="output-header-actions">
+            <span className="output-status-running">
+              <span className="output-spinner" /> Running...
+            </span>
+          </div>
+        ) : null}
       </div>
 
-      <pre>
-        {output ||
-          (executionEnabled
-            ? "Run the current file to see output here."
-            : "Code execution is disabled in the hosted demo. Use the local Docker setup to run code.")}
-      </pre>
-    </section>
+      <div className="output-content-area">
+        <pre className="output-terminal-text">
+          {output ||
+            (executionEnabled
+              ? "⚡ Run the current file to see execution output here."
+              : "Code execution is disabled in the hosted demo. Use the local Docker setup to run code.")}
+        </pre>
+      </div>
+    </div>
   );
 };
 
