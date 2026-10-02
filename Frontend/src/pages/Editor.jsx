@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { runCode } from "../api/execute";
+import { getExecutionUsage, runCode } from "../api/execute";
 import {
   changeRoomRole,
   getRoom,
@@ -41,6 +41,7 @@ const Editor = () => {
   const [actionUserId, setActionUserId] = useState(null);
   const [presenceToasts, setPresenceToasts] = useState([]);
   const [remoteCursors, setRemoteCursors] = useState({});
+  const [usage, setUsage] = useState({ used: 0, limit: 50, remaining: 50 });
 
   const hasJoinedRef = useRef(false);
   const codeSyncTimeoutRef = useRef(null);
@@ -164,6 +165,21 @@ const Editor = () => {
         window.clearTimeout(timeoutId);
       });
       presenceToastTimeoutsRef.current = [];
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    getExecutionUsage()
+      .then((data) => {
+        if (!cancelled && data && typeof data.used === "number") {
+          setUsage(data);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
     };
   }, []);
 
@@ -337,6 +353,12 @@ const Editor = () => {
       setIsRunning(false);
     };
 
+    const handleExecutionUsage = (nextUsage) => {
+      if (nextUsage && typeof nextUsage.used === "number") {
+        setUsage(nextUsage);
+      }
+    };
+
     const handleCursorUpdate = (cursor) => {
       setRemoteCursors((currentCursors) => ({
         ...currentCursors,
@@ -383,6 +405,7 @@ const Editor = () => {
     socket.on("code-update", handleCodeUpdate);
     socket.on("receive-message", handleReceiveMessage);
     socket.on("execution-result", handleExecutionResult);
+    socket.on("execution-usage", handleExecutionUsage);
     socket.on("cursor_update", handleCursorUpdate);
     socket.on("cursor-remove", handleCursorRemove);
     socket.on("removed-from-room", handleRemovedFromRoom);
@@ -417,6 +440,7 @@ const Editor = () => {
       socket.off("code-update", handleCodeUpdate);
       socket.off("receive-message", handleReceiveMessage);
       socket.off("execution-result", handleExecutionResult);
+      socket.off("execution-usage", handleExecutionUsage);
       socket.off("cursor_update", handleCursorUpdate);
       socket.off("cursor-remove", handleCursorRemove);
       socket.off("removed-from-room", handleRemovedFromRoom);
@@ -484,8 +508,10 @@ const Editor = () => {
   };
 
   const handleRun = async () => {
-    if (!executionEnabled) {
-      setOutput("Code execution is disabled in the hosted demo. Use the local Docker setup to run code.");
+    if (usage && usage.remaining === 0) {
+      setOutput(
+        `Daily execution limit reached (${usage.used}/${usage.limit} runs today). Resets at 00:00 UTC.`
+      );
       return;
     }
 
@@ -494,8 +520,14 @@ const Editor = () => {
       setOutputTab("output");
       const response = await runCode(roomId, language, code, customInput);
       setOutput(response.output);
+      if (response.usage) {
+        setUsage(response.usage);
+      }
     } catch (requestError) {
       setOutput(requestError.error || "Execution failed");
+      if (requestError.usage) {
+        setUsage(requestError.usage);
+      }
     } finally {
       setIsRunning(false);
     }
@@ -611,6 +643,7 @@ const Editor = () => {
         onToggleDrawer={handleToggleDrawer}
         roomId={roomId}
         setLanguage={handleLanguageChange}
+        usage={usage}
       />
 
       {/* Mobile Tab Navigation Bar (Visible only on screens <= 860px) */}

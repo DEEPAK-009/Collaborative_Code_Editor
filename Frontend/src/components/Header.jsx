@@ -22,6 +22,7 @@ const Header = ({
   onToggleDrawer,
   roomId,
   setLanguage,
+  usage,
 }) => {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -191,8 +192,14 @@ const Header = ({
           type="button"
           className="run-btn"
           onClick={onRun}
-          disabled={isRunning || !canEdit}
-          title={canEdit ? "Execute Code" : "Read-only view"}
+          disabled={isRunning || !canEdit || (usage && usage.remaining === 0)}
+          title={
+            usage && usage.remaining === 0
+              ? "Daily execution limit reached (50/50 runs)"
+              : canEdit
+              ? "Execute Code (Ctrl + Enter / ⌘ + Enter)"
+              : "Read-only view"
+          }
         >
           {isRunning ? (
             <>
@@ -215,6 +222,25 @@ const Header = ({
             </>
           )}
         </button>
+
+        {usage && typeof usage.used === "number" ? (
+          <div
+            className={`header-runs-counter ${
+              usage.remaining === 0
+                ? "exhausted"
+                : usage.remaining <= 10
+                ? "low"
+                : ""
+            }`}
+            title={`Daily executions: ${usage.used} of ${usage.limit} used today (resets at 00:00 UTC)`}
+          >
+            <span className="runs-dot" />
+            <span className="runs-count">
+              {usage.used}/{usage.limit}
+            </span>
+            <span className="runs-label">runs</span>
+          </div>
+        ) : null}
       </div>
 
       {/* Right Section: Drawers & Exit Button */}

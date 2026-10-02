@@ -331,6 +331,77 @@
   animation: spin 0.8s linear infinite;
 }
 
+/* Daily Runs Counter Badge */
+.header-runs-counter {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  user-select: none;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.header-runs-counter .runs-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  flex-shrink: 0;
+}
+
+.header-runs-counter .runs-count {
+  color: #f1f5f9;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-weight: 700;
+}
+
+.header-runs-counter .runs-label {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Low runs warning */
+.header-runs-counter.low {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.header-runs-counter.low .runs-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.header-runs-counter.low .runs-count {
+  color: #fbbf24;
+}
+
+/* Exhausted / limit reached */
+.header-runs-counter.exhausted {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.header-runs-counter.exhausted .runs-dot {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.header-runs-counter.exhausted .runs-count {
+  color: #f87171;
+}
+
 /* Drawer Buttons */
 .header-drawer-btn {
   height: 38px;

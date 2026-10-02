@@ -5,12 +5,13 @@ const router = express.Router();
 const executeController = require("../controllers/executeController");
 const executionLimiter = require("../utils/rateLimiter");
 const authenticateUser = require("../middleware/authMiddleware");
-const { authenticate } = require("passport");
+
+router.get("/execute/usage", authenticateUser, executeController.getExecutionUsage);
 
 router.post(
   "/execute",
-  authenticateUser, 
-  executionLimiter, 
+  authenticateUser,
+  executionLimiter,
   executeController.executeCode
 );
 
