@@ -1,94 +1,69 @@
-# Portfolio Deployment Notes
+# Deployment Guide
 
-This setup is designed for a portfolio deployment, not a high-scale production environment.
+CollabX can be deployed using either **Judge0 Cloud/Self-Hosted API** (recommended for easy cloud hosting like Render/Vercel) or a **Dedicated Docker VPS**.
 
-## Free Demo Deployment
+---
 
-For the easiest free deployment:
+## Recommended Free Deployment (Render + Vercel + Judge0)
 
-- Frontend: Vercel or Netlify
-- Backend: Render, Railway, or Koyeb
-- Database: MongoDB Atlas free tier
+With **Judge0**, you do not need Docker on your backend server. You can deploy both frontend and backend for free on standard cloud platforms with full live code execution and stdin support:
 
-In this mode, disable live code execution:
+- **Frontend**: [Vercel](https://vercel.com) or [Netlify](https://netlify.com)
+- **Backend**: [Render](https://render.com) or [Railway](https://railway.app)
+- **Database**: [MongoDB Atlas Free Tier](https://www.mongodb.com/atlas)
+- **Code Execution**: Judge0 CE (`https://ce.judge0.com`) or Self-Hosted
 
-- `Backend/.env`: `ENABLE_CODE_EXECUTION=false`
-- `Frontend/.env`: `VITE_ENABLE_CODE_EXECUTION=false`
+---
 
-That keeps auth, rooms, chat, roles, sockets, and collaborative editing online while avoiding Docker hosting requirements.
+## 1. Backend Deployment (Render / Railway)
 
-## Recommended Setup
+1. Connect your GitHub repository to **Render** or **Railway** as a **Web Service**.
+2. Set the Root Directory to `Backend`.
+3. Build Command: `npm install`
+4. Start Command: `npm start`
+5. Configure Environment Variables in the hosting dashboard:
+   ```env
+   PORT=6050
+   MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/collab-code-editor
+   JWT_SECRET=your-random-jwt-secret
+   JWT_EXPIRES=7d
+   FRONTEND_URL=https://your-frontend.vercel.app
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+   GOOGLE_CALLBACK_URL=https://your-backend.onrender.com/api/auth/google/callback
 
-- Frontend: Vercel or Netlify
-- Backend: Docker-capable VPS
-- Database: MongoDB Atlas
+   # Code Execution Settings
+   ENABLE_CODE_EXECUTION=true
+   EXECUTION_PROVIDER=judge0
+   JUDGE0_API_URL=https://ce.judge0.com
+   ```
 
-## Why the Backend Needs a VPS
+---
 
-The backend executes user code by starting Docker containers. Because of that, the backend should run on a host where Docker is available and the backend container can access the Docker socket.
+## 2. Frontend Deployment (Vercel / Netlify)
 
-## Backend Deployment
+1. Import your GitHub repository on **Vercel**.
+2. Set Root Directory to `Frontend` (or project root depending on build setup).
+3. Framework Preset: `Vite`.
+4. Configure Environment Variables in Vercel:
+   ```env
+   VITE_API_URL=https://your-backend.onrender.com/api
+   VITE_ENABLE_CODE_EXECUTION=true
+   ```
+5. Click **Deploy**.
 
-1. Clone the repository onto the VPS.
-2. Place the project at a stable host path such as:
+---
 
-   `/opt/collaborative-code-editor`
+## 3. Google OAuth Configuration
 
-3. Create the required env files:
+Update your Google Cloud Console OAuth 2.0 Client:
+- **Authorized JavaScript origins**: `https://your-frontend.vercel.app`
+- **Authorized redirect URIs**: `https://your-backend.onrender.com/api/auth/google/callback`
 
-   - copy `.env.example` to `.env`
-   - copy `Backend/.env.example` to `Backend/.env`
+---
 
-4. Fill in the real values in `Backend/.env`:
+## 4. Alternative: Self-Hosted on Docker VPS
 
-   - `MONGO_URI`
-   - `JWT_SECRET`
-   - `FRONTEND_URL`
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
-   - `GOOGLE_CALLBACK_URL`
-
-5. Make sure the shared execution temp directory exists on the host:
-
-   `mkdir -p /opt/collaborative-code-editor/Backend/temp`
-
-6. Start the backend service:
-
-   `docker compose up -d --build`
-
-## Frontend Deployment
-
-1. Deploy the [`frontend`](/Users/deepakreddy/Downloads/Collaborative-Code-editor/frontend) app to Vercel or Netlify.
-2. Copy `frontend/.env.example` to the hosting platform env settings.
-3. Set:
-
-   `VITE_API_URL=https://your-backend-domain.com/api`
-
-4. Redeploy the frontend after setting the environment variable.
-
-## Google OAuth Setup
-
-Update the Google Cloud OAuth app with the deployed values:
-
-- Authorized JavaScript origin:
-  `https://your-frontend-domain.com`
-- Authorized redirect URI:
-  `https://your-backend-domain.com/api/auth/google/callback`
-
-## Useful Commands
-
-- Validate compose config:
-  `docker compose config --quiet`
-- Start backend:
-  `docker compose up -d --build`
-- View logs:
-  `docker compose logs -f backend`
-- Stop backend:
-  `docker compose down`
-
-## Important Notes
-
-- The backend container uses the host Docker socket to run language containers.
-- The path in `HOST_CODE_EXECUTION_TMP_DIR` must be a real host path.
-- This deployment style is suitable for demos and portfolio use.
-- If `Backend/.env` contains old local secrets, rotate them before public hosting.
+If you prefer self-hosting everything (Backend + Docker Sandbox + Judge0) on an **Oracle Cloud Always Free VM** or **AWS EC2**:
+- Follow [`docs/JUDGE0_SELF_HOSTING.md`](./docs/JUDGE0_SELF_HOSTING.md) for deploying Judge0.
+- Use `docker compose up -d --build` to run the CollabX backend with Docker socket access.
