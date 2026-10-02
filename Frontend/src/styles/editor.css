@@ -616,7 +616,7 @@
 .output-shell-header {
   min-height: 34px;
   height: 34px;
-  padding: 0 12px;
+  padding: 0 8px;
   background: #202b3f;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
@@ -625,10 +625,37 @@
   flex-shrink: 0;
 }
 
-.output-title-chip {
+.output-tab-group {
   display: flex;
   align-items: center;
+  gap: 4px;
+}
+
+.output-tab-btn {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.output-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f5f9;
+}
+
+.output-tab-btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .output-terminal-dot {
@@ -637,6 +664,20 @@
   border-radius: 999px;
   background-color: #38bdf8;
   box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+}
+
+.input-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background-color: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+}
+
+.output-title-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .output-shell-title {
@@ -650,6 +691,31 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding-right: 4px;
+}
+
+.output-status-running {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #38bdf8;
+}
+
+.output-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(56, 189, 248, 0.3);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: outputSpin 0.8s linear infinite;
+}
+
+@keyframes outputSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .output-content-area {
@@ -658,6 +724,8 @@
   overflow: auto;
   padding: 12px 14px;
   background: #1A2232;
+  display: flex;
+  flex-direction: column;
 }
 
 .output-terminal-text {
@@ -668,6 +736,36 @@
   color: #d4d4d8;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.output-input-area {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.output-stdin-textarea {
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  flex: 1;
+  background: transparent;
+  border: none;
+  resize: none;
+  color: #f1f5f9;
+  font-family: "JetBrains Mono", Consolas, "SFMono-Regular", Menlo, Monaco, monospace;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  outline: none;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.output-stdin-textarea::placeholder {
+  color: rgba(148, 163, 184, 0.45);
+  font-style: italic;
 }
 
 /* --------------------------------------------------------------------------

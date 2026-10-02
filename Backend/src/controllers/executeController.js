@@ -5,7 +5,7 @@ const isExecutionEnabled = () => process.env.ENABLE_CODE_EXECUTION !== "false";
 
 const executeCode = async (req, res) => {
   try {
-    const { language, code, roomId } = req.body;
+    const { language, code, roomId, input } = req.body;
 
     if (!language || typeof code !== "string" || !roomId) {
       return res.status(400).json({
@@ -21,7 +21,7 @@ const executeCode = async (req, res) => {
       });
     }
 
-    const output = await executionService.executeCode(language, code);
+    const output = await executionService.executeCode(language, code, input || "");
 
     const io = req.app.get("io");
     io.to(roomId).emit("execution-result", {

@@ -33,6 +33,8 @@ const Editor = () => {
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("javascript");
   const [output, setOutput] = useState("");
+  const [customInput, setCustomInput] = useState("");
+  const [outputTab, setOutputTab] = useState("output");
   const [connectionStatus, setConnectionStatus] = useState("connecting");
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState("");
@@ -489,7 +491,8 @@ const Editor = () => {
 
     try {
       setIsRunning(true);
-      const response = await runCode(roomId, language, code);
+      setOutputTab("output");
+      const response = await runCode(roomId, language, code, customInput);
       setOutput(response.output);
     } catch (requestError) {
       setOutput(requestError.error || "Execution failed");
@@ -696,6 +699,10 @@ const Editor = () => {
             executionEnabled={executionEnabled}
             isRunning={isRunning}
             output={output}
+            input={customInput}
+            onInputChange={setCustomInput}
+            activeTab={outputTab}
+            onTabChange={setOutputTab}
           />
         </section>
       </main>

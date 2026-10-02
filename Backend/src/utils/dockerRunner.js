@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const languageConfig = require("./languageConfig");
 
-const runCode = (language, code) => {
+const runCode = (language, code, input = "") => {
   return new Promise((resolve, reject) => {
     const config = languageConfig[language];
 
@@ -33,8 +33,10 @@ const runCode = (language, code) => {
         : config.run;
 
     const filePath = path.join(dirPath, filename);
+    const inputPath = path.join(dirPath, "input.txt");
 
     fs.writeFileSync(filePath, code);
+    fs.writeFileSync(inputPath, typeof input === "string" ? input : "");
 
     const dockerCommand = `docker run --rm \
     --memory="128m" \
@@ -42,7 +44,7 @@ const runCode = (language, code) => {
     --network=none \
     -v "${dirPath}:/app" \
     -w /app \
-    ${config.image} sh -c "${runCommand}"`;
+    ${config.image} sh -c "${runCommand} < input.txt"`;
 
     exec(
       dockerCommand,
