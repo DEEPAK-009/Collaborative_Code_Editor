@@ -187,38 +187,34 @@ const Header = ({
           )}
         </div>
 
-        {executionEnabled ? (
-          <button
-            type="button"
-            className="run-btn"
-            onClick={onRun}
-            disabled={isRunning || !canEdit}
-            title={canEdit ? "Execute Code" : "Read-only view"}
-          >
-            {isRunning ? (
-              <>
-                <span className="run-spinner" />
-                <span>Running...</span>
-              </>
-            ) : (
-              <>
-                <svg
-                  className="run-icon"
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="#ffffff"
-                  aria-hidden="true"
-                >
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-                <span>Run</span>
-              </>
-            )}
-          </button>
-        ) : (
-          <span className="status-pill idle">Demo mode</span>
-        )}
+        <button
+          type="button"
+          className="run-btn"
+          onClick={onRun}
+          disabled={isRunning || !canEdit}
+          title={canEdit ? "Execute Code" : "Read-only view"}
+        >
+          {isRunning ? (
+            <>
+              <span className="run-spinner" />
+              <span>Running...</span>
+            </>
+          ) : (
+            <>
+              <svg
+                className="run-icon"
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="#ffffff"
+                aria-hidden="true"
+              >
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              <span>Run</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Right Section: Drawers & Exit Button */}

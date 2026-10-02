@@ -17,7 +17,7 @@ import Output from "../components/Output";
 import "../styles/editor.css";
 import "../styles/editor.mobile.css";
 
-const executionEnabled = import.meta.env.VITE_ENABLE_CODE_EXECUTION !== "false";
+const executionEnabled = true;
 
 const Editor = () => {
   const { roomId } = useParams();

@@ -43,10 +43,7 @@ const Output = ({
       <div className="output-content-area">
         {activeTab === "output" ? (
           <pre className="output-terminal-text">
-            {output ||
-              (executionEnabled
-                ? "⚡ Run the current file to see execution output here."
-                : "Code execution is disabled in the hosted demo. Use the local Docker setup to run code.")}
+            {output || "⚡ Run the current file to see execution output here."}
           </pre>
         ) : (
           <div className="output-input-area">
