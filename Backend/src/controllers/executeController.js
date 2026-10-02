@@ -49,8 +49,8 @@ const executeCode = async (req, res) => {
         roomId,
       });
 
-      // Broadcast live counter update to all participants in the room
-      io.to(roomId).emit("execution-usage", updatedUsage);
+      // Broadcast live counter update to ALL users across ALL rooms globally
+      io.emit("execution-usage", updatedUsage);
     }
 
     res.json({ output, usage: updatedUsage });

@@ -1,5 +1,6 @@
 const roomService = require("../services/roomService");
 const chatService = require("../services/chatService");
+const usageService = require("../services/usageService");
 const presenceStore = require("./presenceStore");
 
 const DISCONNECT_GRACE_MS = 5000;
@@ -52,6 +53,14 @@ const finalizeDeparture = async (io, roomId, userId) => {
 const socketHandler = (io) => {
   io.on("connection", (socket) => {
     const lastCursorUpdate = {};
+
+    // Send the latest global daily execution usage to the newly connected user
+    usageService
+      .getDailyUsage()
+      .then((usage) => {
+        socket.emit("execution-usage", usage);
+      })
+      .catch(() => {});
 
     const handleJoinRoom = async (payload = {}, rejoined = false) => {
       const { roomId } = payload;
