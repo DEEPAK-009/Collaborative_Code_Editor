@@ -74,15 +74,9 @@ const Header = ({
     <header className="editor-header">
       {/* Left Section: Brand & Room Chip */}
       <div className="editor-header__section editor-header__section--left">
-        <button
-          type="button"
-          className="editor-brand-btn"
-          onClick={onBackToDashboard}
-          title="CollabX - Leave room and return to dashboard"
-          aria-label="CollabX - Leave room"
-        >
+        <div className="editor-brand-display" title="CollabX">
           <Logo size={32} textColor="#ffffff" />
-        </button>
+        </div>
 
         <div className="editor-header-divider" />
 

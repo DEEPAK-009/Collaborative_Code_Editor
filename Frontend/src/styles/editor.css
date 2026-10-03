@@ -61,25 +61,13 @@
   gap: 10px;
 }
 
-/* Brand Link / Button */
-.editor-brand-link,
-.editor-brand-btn {
-  text-decoration: none;
-  background: transparent;
-  border: none;
-  padding: 0;
+/* Static Brand Display */
+.editor-brand-display {
   display: inline-flex;
   align-items: center;
-  cursor: pointer;
-  outline: none;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  user-select: none;
+  cursor: default;
   filter: drop-shadow(0 2px 8px rgba(59, 130, 246, 0.3));
-}
-
-.editor-brand-link:hover,
-.editor-brand-btn:hover {
-  transform: translateY(-1px);
-  opacity: 0.95;
 }
 
 .editor-header-divider {
