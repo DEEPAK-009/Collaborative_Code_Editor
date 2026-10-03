@@ -1392,17 +1392,14 @@
 .role-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  min-height: 24px;
-  padding: 0 10px;
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 9px;
   border-radius: 999px;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: capitalize;
-}
-
-.role-icon {
-  font-size: 0.74rem;
+  letter-spacing: 0.02em;
 }
 
 .role-owner {

@@ -17,12 +17,6 @@ const getAvatarColor = (name = "") => {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 };
 
-const ROLE_ICONS = {
-  owner: "👑",
-  editor: "✏️",
-  viewer: "👁️",
-};
-
 const Participants = ({
   actionUserId,
   currentUserId,
@@ -104,7 +98,6 @@ const Participants = ({
 
                 <div className="participant-badges">
                   <span className={`role-pill role-${role}`}>
-                    <span className="role-icon">{ROLE_ICONS[role] || "•"}</span>
                     <span>{role}</span>
                   </span>
 
@@ -145,8 +138,8 @@ const Participants = ({
                               disabled={isLoading}
                               className="participant-role-select"
                             >
-                              <option value="editor">✏️ Editor (Can edit)</option>
-                              <option value="viewer">👁️ Viewer (Read only)</option>
+                              <option value="editor">Editor (Can edit)</option>
+                              <option value="viewer">Viewer (Read only)</option>
                             </select>
                           </div>
 
