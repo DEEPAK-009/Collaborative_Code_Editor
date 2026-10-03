@@ -637,8 +637,9 @@ const Editor = () => {
   };
 
   const handleLeaveRoom = (skipConfirm = false) => {
+    const shouldSkip = skipConfirm === true;
     if (
-      !skipConfirm &&
+      !shouldSkip &&
       !window.confirm("Leave the room and go back to dashboard?")
     ) {
       return;
@@ -682,7 +683,7 @@ const Editor = () => {
         language={language}
         memberCount={room?.members?.length || 1}
         messageCount={messages.length}
-        onBackToDashboard={handleLeaveRoom}
+        onBackToDashboard={() => handleLeaveRoom()}
         onDownloadCode={handleDownloadCode}
         onRun={handleRun}
         onToggleDrawer={handleToggleDrawer}
