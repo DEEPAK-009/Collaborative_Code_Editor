@@ -454,21 +454,38 @@ const Editor = () => {
   }, [currentUserId, navigate, roomId, token]);
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (!canEditRef.current || !socket.connected) {
-        return;
-      }
+    // Push dummy history entry so back button can be intercepted
+    window.history.pushState(null, "", window.location.href);
 
-      socket.emit("code-change", {
-        roomId,
-        code: latestCodeRef.current,
-        language: latestLanguageRef.current,
-      });
+    const handlePopState = () => {
+      const confirmLeave = window.confirm(
+        "Leave the room and go back to dashboard?"
+      );
+      if (confirmLeave) {
+        handleLeaveRoom(true);
+      } else {
+        // Stay in room
+        window.history.pushState(null, "", window.location.href);
+      }
     };
 
+    const handleBeforeUnload = (event) => {
+      if (canEditRef.current && socket.connected) {
+        socket.emit("code-change", {
+          roomId,
+          code: latestCodeRef.current,
+          language: latestLanguageRef.current,
+        });
+      }
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("popstate", handlePopState);
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
+      window.removeEventListener("popstate", handlePopState);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [roomId]);
@@ -619,8 +636,11 @@ const Editor = () => {
     }
   };
 
-  const handleLeaveRoom = () => {
-    if (!window.confirm("Leave the room and go back to dashboard?")) {
+  const handleLeaveRoom = (skipConfirm = false) => {
+    if (
+      !skipConfirm &&
+      !window.confirm("Leave the room and go back to dashboard?")
+    ) {
       return;
     }
 

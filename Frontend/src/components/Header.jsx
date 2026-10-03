@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import Logo from "./Logo";
 
 const LANGUAGE_OPTIONS = [
@@ -75,9 +74,15 @@ const Header = ({
     <header className="editor-header">
       {/* Left Section: Brand & Room Chip */}
       <div className="editor-header__section editor-header__section--left">
-        <Link to="/" className="editor-brand-link" title="CollabX Home">
+        <button
+          type="button"
+          className="editor-brand-btn"
+          onClick={onBackToDashboard}
+          title="CollabX - Leave room and return to dashboard"
+          aria-label="CollabX - Leave room"
+        >
           <Logo size={32} textColor="#ffffff" />
-        </Link>
+        </button>
 
         <div className="editor-header-divider" />
 
