@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CollabX — Architecture Diagram</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* ── Reset & Base ───────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .page-wrapper { max-width: 1240px; margin: 0 auto; padding: 32px 28px 60px; }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: #2563eb; display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 22px; flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    .header-title { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.025em; line-height: 1.2; }
+    .header-sub { font-size: 13px; color: #64748b; margin-top: 3px; font-weight: 400; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    /* ── Buttons ─────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.15s ease; text-decoration: none;
+      line-height: 1;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-outline { background: #fff; color: #374151; border: 1.5px solid #d1d5db; }
+    .btn-outline:hover { background: #f9fafb; border-color: #9ca3af; }
+
+    /* ── Tabs ────────────────────────────────────────────── */
+    .tab-bar { display: flex; gap: 6px; margin-bottom: 24px; }
+    .tab-btn {
+      padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid #e2e8f0; background: #fff;
+      color: #64748b; transition: all 0.15s ease; line-height: 1;
+    }
+    .tab-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .tab-btn:not(.active):hover { background: #f1f5f9; color: #334155; }
+
+    /* ── Cards & Sections ────────────────────────────────── */
+    .card {
+      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px;
+      padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; color: #0f172a;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+    }
+    .card-title .icon { font-size: 20px; }
+    .card-sub { font-size: 12px; color: #94a3b8; font-weight: 500; }
+    .card-meta {
+      font-family: 'SF Mono', 'Fira Mono', monospace;
+      font-size: 12px; background: #f1f5f9; color: #374151;
+      padding: 3px 9px; border-radius: 6px; border: 1px solid #e2e8f0;
+      font-weight: 500;
+    }
+    .section-label {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #94a3b8; margin-bottom: 10px;
+    }
+
+    /* ── Node Cards ──────────────────────────────────────── */
+    .node {
+      background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px;
+      padding: 11px 14px; cursor: pointer; transition: all 0.18s ease;
+      display: flex; align-items: flex-start; gap: 11px;
+    }
+    .node:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); border-color: #93c5fd; }
+    .node-icon { font-size: 22px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+    .node-name { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+    .node-desc { font-size: 11.5px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+    .node-sub  { font-size: 11px; color: #94a3b8; margin-top: 1px; line-height: 1.4; }
+
+    /* ── Tags & Badges ───────────────────────────────────── */
+    .tag {
+      display: inline-flex; align-items: center;
+      font-size: 11.5px; font-weight: 600;
+      padding: 3px 9px; border-radius: 999px;
+      line-height: 1.2;
+    }
+    .tag-blue    { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .tag-purple  { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+    .tag-green   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .tag-slate   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .tag-red     { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; font-size: 11px; }
+    .tag-orange  { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    .tag-emerald { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .badge-get    { background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-post   { background: #f0fdf4; color: #15803d; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-patch  { background: #fefce8; color: #a16207; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-put    { background: #faf5ff; color: #6d28d9; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-delete { background: #fff1f2; color: #be123c; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-ws     { background: #ede9fe; color: #6d28d9; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+
+    /* ── Grid layouts ────────────────────────────────────── */
+    .grid-3  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+    .grid-2  { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .stack   { display: flex; flex-direction: column; gap: 10px; }
+    .wrap    { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* ── Flow Timeline ───────────────────────────────────── */
+    .flow-row { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding-bottom: 4px; }
+    .flow-step { display: flex; flex-direction: column; align-items: center; min-width: 135px; }
+    .flow-num {
+      width: 36px; height: 36px; border-radius: 50%; background: #2563eb;
+      color: #fff; font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .flow-num.success { background: #10b981; }
+    .flow-vline { width: 1px; height: 12px; background: #e2e8f0; }
+    .flow-box {
+      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      padding: 10px 12px; text-align: center; width: 124px;
+    }
+    .flow-box.success { background: #f0fdf4; border-color: #bbf7d0; }
+    .flow-box-title { font-size: 12px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+    .flow-box-sub   { font-size: 10.5px; color: #64748b; margin-top: 3px; line-height: 1.4; }
+    .flow-connector {
+      display: flex; align-items: center; flex-direction: column;
+      min-width: 54px; margin-top: 17px;
+    }
+    .flow-arrow-line { flex: 1; border-top: 2px dashed #cbd5e1; min-width: 54px; }
+    .flow-arrow-label { font-size: 10px; font-weight: 700; color: #94a3b8; white-space: nowrap; margin-bottom: 2px; }
+
+    /* ── Table ───────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { border-bottom: 2px solid #e2e8f0; }
+    thead th { text-align: left; padding: 10px 14px; font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+    tbody tr { border-bottom: 1px solid #f1f5f9; }
+    tbody tr:hover { background: #fafafa; }
+    tbody td { padding: 10px 14px; color: #374151; vertical-align: middle; }
+    td.mono   { font-family: 'SF Mono', 'Fira Mono', monospace; font-size: 12px; color: #1e293b; }
+
+    /* ── Detail Drawer ───────────────────────────────────── */
+    .drawer-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 900;
+    }
+    .drawer-overlay.open { display: block; }
+    .drawer {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 700px; z-index: 901;
+      background: #fff; border-radius: 20px 20px 0 0;
+      border: 1.5px solid #e2e8f0; border-bottom: none;
+      padding: 24px 28px 32px;
+      box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
+      transition: transform 0.25s ease;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .drawer-handle { width: 40px; height: 4px; background: #e2e8f0; border-radius: 9px; margin: 0 auto 18px; }
+    .drawer-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .drawer-title { font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.3; }
+    .drawer-path  { font-size: 11.5px; color: #94a3b8; margin-top: 3px; font-family: monospace; }
+    .drawer-close {
+      width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9;
+      border: none; cursor: pointer; font-size: 16px; display: flex;
+      align-items: center; justify-content: center; color: #64748b; flex-shrink: 0;
+    }
+    .drawer-close:hover { background: #e2e8f0; color: #0f172a; }
+    .drawer-items { display: flex; flex-direction: column; gap: 8px; }
+    .drawer-item  { display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
+    .drawer-bullet { color: #2563eb; font-weight: 800; margin-top: 1px; flex-shrink: 0; }
+    .drawer-text  { font-size: 13px; color: #374151; }
+
+    /* ── DB Schema ───────────────────────────────────────── */
+    .schema-card {
+      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px;
+      overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .schema-header {
+      padding: 14px 18px 12px;
+      border-bottom: 1.5px solid #f1f5f9;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .schema-title { font-size: 14px; font-weight: 800; color: #0f172a; }
+    .schema-desc  { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
+    .schema-table table { font-size: 12px; }
+    .schema-table thead th { font-size: 10.5px; padding: 8px 14px; }
+    .schema-table tbody td { padding: 7px 14px; }
+    .col-pk   { font-family: monospace; font-weight: 800; color: #d97706; }
+    .col-fk   { font-family: monospace; font-weight: 700; color: #3b82f6; }
+    .col-name { font-family: monospace; color: #1e293b; }
+    .col-type { font-family: monospace; color: #64748b; }
+
+    /* ── Data Flow Step ──────────────────────────────────── */
+    .flow-step-card {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px;
+      padding: 13px 16px;
+    }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: #fff; margin-top: 1px;
+    }
+    .step-title { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.3; }
+    .step-desc  { font-size: 12px; color: #64748b; margin-top: 3px; line-height: 1.5; }
+
+    /* ── Print / Export ──────────────────────────────────── */
+    @media print {
+      .no-print { display: none !important; }
+      .drawer-overlay, .drawer { display: none !important; }
+      body { background: #fff; }
+      .tab-content { display: block !important; page-break-inside: avoid; }
+      .tab-section { margin-bottom: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ─── Header ─────────────────────────────────────────── -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-icon">&lt;/&gt;</div>
+      <div>
+        <div class="header-title">CollabX — Architecture Diagram</div>
+        <div class="header-sub">Real-Time Collaborative Code Editor &amp; Sandboxed Execution Platform &nbsp;·&nbsp; React &nbsp;·&nbsp; Node.js &nbsp;·&nbsp; Socket.IO &nbsp;·&nbsp; Judge0 &nbsp;·&nbsp; MongoDB</div>
+      </div>
+    </div>
+    <div class="header-actions no-print">
+      <button class="btn btn-outline" onclick="window.print()">🖨️ &nbsp;Print / PDF</button>
+      <button class="btn btn-primary" onclick="downloadHTML()">⬇️ &nbsp;Download HTML</button>
+    </div>
+  </div>
+
+  <!-- ─── Tabs ────────────────────────────────────────────── -->
+  <div class="tab-bar no-print">
+    <button class="tab-btn active" onclick="showTab('overview')">System Overview</button>
+    <button class="tab-btn"        onclick="showTab('api')">API &amp; Sockets</button>
+    <button class="tab-btn"        onclick="showTab('dataflow')">Data Flow</button>
+    <button class="tab-btn"        onclick="showTab('db')">Database Schema</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- TAB 1 — SYSTEM OVERVIEW                               -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="tab-overview" class="tab-content tab-section">
+
+    <!-- 3-column layout -->
+    <div class="grid-3" style="margin-bottom: 20px;">
+
+      <!-- ── COLUMN 1: Frontend ── -->
+      <div class="card">
+        <div class="card-title">
+          <span class="icon">⚛️</span>
+          <div>
+            <div>Frontend</div>
+            <div class="card-sub" style="font-size:11.5px; margin-top:2px;">React 18 + Vite &nbsp;·&nbsp; Hosted on Vercel</div>
+          </div>
+        </div>
+
+        <div class="section-label">Pages</div>
+        <div class="stack" style="margin-bottom: 18px;">
+          <div class="node" onclick="openDrawer('editor-page')">
+            <span class="node-icon">💻</span>
+            <div>
+              <div class="node-name">Editor (/editor/:roomId)</div>
+              <div class="node-desc">Monaco editor · split resizer · real-time cursors · output/input tabs</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('dashboard-page')">
+            <span class="node-icon">📊</span>
+            <div>
+              <div class="node-name">Dashboard (/dashboard)</div>
+              <div class="node-desc">Create 6-char room · join by code · profile &amp; security</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('home-page')">
+            <span class="node-icon">🏠</span>
+            <div>
+              <div class="node-name">Home (/)</div>
+              <div class="node-desc">Interactive live Monaco playground · feature bento grid</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('auth-pages')">
+            <span class="node-icon">🔐</span>
+            <div>
+              <div class="node-name">Login / Signup / OAuth</div>
+              <div class="node-desc">Email/Password + Google OAuth 2.0 callback handler</div>
+              <div class="node-sub">Public-only routes with JWT storage</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">Core Components</div>
+        <div class="wrap" style="margin-bottom: 18px;">
+          <span class="tag tag-blue" onclick="openDrawer('monaco-comp')" style="cursor:pointer;">CodeEditor (Monaco)</span>
+          <span class="tag tag-blue" onclick="openDrawer('output-comp')" style="cursor:pointer;">Output + Stdin Tabs</span>
+          <span class="tag tag-blue" onclick="openDrawer('header-comp')" style="cursor:pointer;">Header + Runs Counter</span>
+          <span class="tag tag-blue" onclick="openDrawer('chat-comp')" style="cursor:pointer;">Chat Drawer</span>
+          <span class="tag tag-blue" onclick="openDrawer('participants-comp')" style="cursor:pointer;">Participants Drawer</span>
+          <span class="tag tag-slate">EditorResizer</span>
+        </div>
+
+        <div class="section-label">Global State &amp; Sockets</div>
+        <div class="stack">
+          <div class="node" onclick="openDrawer('auth-ctx')" style="border-color: #bfdbfe; background: #eff6ff;">
+            <span class="node-icon">🧠</span>
+            <div>
+              <div class="node-name">AuthContext</div>
+              <div class="node-desc">user · token · login · signup · googleLogin</div>
+              <div class="node-sub">Syncs to localStorage &amp; session token</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('socket-client')" style="border-color: #ddd6fe; background: #faf5ff;">
+            <span class="node-icon">⚡</span>
+            <div>
+              <div class="node-name">Socket.IO Singleton</div>
+              <div class="node-desc">autoConnect: false · JWT handshake auth</div>
+              <div class="node-sub">code-change · cursor_move · presence · usage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COLUMN 2: Backend ── -->
+      <div class="card">
+        <div class="card-title">
+          <span class="icon">🟢</span>
+          <div>
+            <div>Backend</div>
+            <div class="card-sub" style="font-size:11.5px; margin-top:2px;">Node.js + Express + Socket.IO &nbsp;·&nbsp; Render / VPS</div>
+          </div>
+        </div>
+
+        <div class="section-label">Route Controllers</div>
+        <div class="stack" style="margin-bottom: 18px;">
+          <div class="node" onclick="openDrawer('auth-ctrl')">
+            <div style="flex-shrink:0; margin-top:1px;">
+              <span class="badge-post">POST</span>&nbsp;<span class="badge-get">GET</span>
+            </div>
+            <div>
+              <div class="node-name">/api/auth</div>
+              <div class="node-desc">signup · login · Google OAuth 2.0 · me · profile · password</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('room-ctrl')">
+            <div style="flex-shrink:0; margin-top:1px; display:flex; gap:4px; flex-wrap:wrap;">
+              <span class="badge-post">POST</span>
+              <span class="badge-get">GET</span>
+              <span class="badge-patch">PATCH</span>
+              <span class="badge-delete">DEL</span>
+            </div>
+            <div>
+              <div class="node-name">/api/rooms &nbsp;<span class="tag tag-red">🔒 JWT</span></div>
+              <div class="node-desc">create (6-char ID) · join · leave · role update · transfer owner · kick</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('execute-ctrl')">
+            <div style="flex-shrink:0; margin-top:1px;">
+              <span class="badge-post">POST</span>&nbsp;<span class="badge-get">GET</span>
+            </div>
+            <div>
+              <div class="node-name">/api/execute &nbsp;<span class="tag tag-red">🔒 JWT</span></div>
+              <div class="node-desc">executeCode (with stdin) · getExecutionUsage (daily runs)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">Services &amp; Real-time Engine</div>
+        <div class="stack" style="margin-bottom: 18px;">
+          <div class="node" onclick="openDrawer('socket-handler')" style="border-color: #c4b5fd; background: #faf5ff;">
+            <span class="node-icon">🔌</span>
+            <div>
+              <div class="node-name">socketHandler + presenceStore</div>
+              <div class="node-desc">Rooms broadcast · cursor sync (100ms throttle) · 5s disconnect grace</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('exec-svc')" style="border-color: #6ee7b7; background: #f0fdf4;">
+            <span class="node-icon">⚡</span>
+            <div>
+              <div class="node-name">executionService</div>
+              <div class="node-desc">Pluggable provider: Judge0 API vs Docker runner · error formatting</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('usage-svc')" style="border-color: #fed7aa; background: #fff7ed;">
+            <span class="node-icon">📈</span>
+            <div>
+              <div class="node-name">usageService</div>
+              <div class="node-desc">Global platform limit (50 runs/day) · atomic MongoDB upsert ($inc)</div>
+            </div>
+          </div>
+          <div class="node" onclick="openDrawer('room-svc')" style="border-color: #bfdbfe; background: #eff6ff;">
+            <span class="node-icon">🚪</span>
+            <div>
+              <div class="node-name">roomService &amp; chatService</div>
+              <div class="node-desc">Room lifecycle · RBAC permissions · pickNextOwner on disconnect</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">Middleware</div>
+        <div class="wrap">
+          <span class="tag tag-red" onclick="openDrawer('auth-mw')" style="cursor:pointer;">verifyAuthToken</span>
+          <span class="tag tag-slate" onclick="openDrawer('rate-limiter')" style="cursor:pointer;">executionLimiter (5/min)</span>
+          <span class="tag tag-slate">Passport Google Strategy</span>
+        </div>
+      </div>
+
+      <!-- ── COLUMN 3: Execution Engines & DB ── -->
+      <div style="display:flex; flex-direction:column; gap:18px;">
+
+        <!-- Execution Engines -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px;">
+            <span class="icon">⚙️</span>
+            <div>
+              <div>Code Execution Engines</div>
+              <div class="card-sub" style="font-size:11.5px; margin-top:2px;">Cloud Judge0 + Local Docker Sandbox</div>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="node" onclick="openDrawer('judge0-engine')" style="border-color: #6ee7b7; background: #f0fdf4;">
+              <span class="node-icon">⚖️</span>
+              <div>
+                <div class="node-name">Judge0 Cloud / Self-Hosted</div>
+                <div class="node-desc">Base64 encoded source &amp; stdin · wait=true with polling fallback</div>
+                <div class="node-sub">Supports: Python, JS, C++, Java, Go, Rust</div>
+              </div>
+            </div>
+            <div class="node" onclick="openDrawer('docker-engine')" style="border-color: #bfdbfe; background: #eff6ff;">
+              <span class="node-icon">🐳</span>
+              <div>
+                <div class="node-name">Docker Sandbox (Optional)</div>
+                <div class="node-desc">Ephemeral temp dir · --network=none · 128MB RAM · 0.5 CPU</div>
+                <div class="node-sub">&lt; input.txt pipe redirection</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- External APIs -->
+        <div class="card">
+          <div class="section-label" style="margin-bottom:12px;">Authentication Providers</div>
+          <div class="stack">
+            <div class="node" onclick="openDrawer('google-oauth')">
+              <span class="node-icon">🔑</span>
+              <div>
+                <div class="node-name">Google OAuth 2.0</div>
+                <div class="node-desc">Passport.js OAuth2 strategy → JWT issuance</div>
+                <div class="node-sub">accounts.google.com</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Database -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px;">
+            <span class="icon">🍃</span>
+            <div>
+              <div>MongoDB Atlas</div>
+              <div class="card-sub" style="font-size:11.5px; margin-top:2px;">Mongoose ODM &nbsp;·&nbsp; Cloud Cluster</div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div class="node" onclick="openDrawer('schema-users')" style="padding:10px; text-align:center; display:block;">
+              <div style="font-size:16px; margin-bottom:4px;">👥</div>
+              <div style="font-size:12px; font-weight:700; color:#0f172a;">users</div>
+              <div style="font-size:11px; color:#64748b; margin-top:2px;">auth · bcrypt · googleId</div>
+            </div>
+            <div class="node" onclick="openDrawer('schema-rooms')" style="padding:10px; text-align:center; display:block;">
+              <div style="font-size:16px; margin-bottom:4px;">📁</div>
+              <div style="font-size:12px; font-weight:700; color:#0f172a;">rooms</div>
+              <div style="font-size:11px; color:#64748b; margin-top:2px;">6-char code · code · members</div>
+            </div>
+            <div class="node" onclick="openDrawer('schema-chat')" style="padding:10px; text-align:center; display:block;">
+              <div style="font-size:16px; margin-bottom:4px;">💬</div>
+              <div style="font-size:12px; font-weight:700; color:#0f172a;">chatmessages</div>
+              <div style="font-size:11px; color:#64748b; margin-top:2px;">in-room history · timestamps</div>
+            </div>
+            <div class="node" onclick="openDrawer('schema-usage')" style="padding:10px; text-align:center; display:block; border-color:#fed7aa; background:#fff7ed;">
+              <div style="font-size:16px; margin-bottom:4px;">⚡</div>
+              <div style="font-size:12px; font-weight:700; color:#0f172a;">dailyexecutions</div>
+              <div style="font-size:11px; color:#64748b; margin-top:2px;">global daily counter (50 max)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Request Flow Timeline ── -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🔄</span> Code Execution &amp; Real-Time Broadcast Flow</div>
+      <div class="flow-row">
+
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-vline"></div>
+          <div class="flow-box">
+            <div class="flow-box-title">User inputs stdin</div>
+            <div class="flow-box-sub">Output/Input Tabs + clicks Run</div>
+          </div>
+        </div>
+
+        <div class="flow-connector">
+          <div class="flow-arrow-label">POST /execute</div>
+          <div class="flow-arrow-line" style="border-color:#2563eb; border-top-style:solid;"></div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-vline"></div>
+          <div class="flow-box" style="border-color:#fed7aa; background:#fff7ed;">
+            <div class="flow-box-title">Limit &amp; Auth Check</div>
+            <div class="flow-box-sub">JWT verified · usage.remaining &gt; 0 check</div>
+          </div>
+        </div>
+
+        <div class="flow-connector">
+          <div class="flow-arrow-label">base64 payload</div>
+          <div class="flow-arrow-line"></div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-vline"></div>
+          <div class="flow-box" style="border-color:#bbf7d0; background:#f0fdf4;">
+            <div class="flow-box-title">Judge0 Sandbox</div>
+            <div class="flow-box-sub">source_code + stdin &lt; wait=true &gt;</div>
+          </div>
+        </div>
+
+        <div class="flow-connector">
+          <div class="flow-arrow-label">atomic $inc</div>
+          <div class="flow-arrow-line" style="border-color:#fed7aa;"></div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-vline"></div>
+          <div class="flow-box" style="border-color:#ddd6fe; background:#faf5ff;">
+            <div class="flow-box-title">MongoDB Update</div>
+            <div class="flow-box-sub">incrementDailyUsage() in DailyExecution</div>
+          </div>
+        </div>
+
+        <div class="flow-connector">
+          <div class="flow-arrow-label">io.emit() ∥</div>
+          <div class="flow-arrow-line" style="border-color:#c4b5fd;"></div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-vline"></div>
+          <div class="flow-box" style="border-color:#bfdbfe; background:#eff6ff;">
+            <div class="flow-box-title">Global Broadcast</div>
+            <div class="flow-box-sub">execution-usage to ALL rooms &amp; users</div>
+          </div>
+        </div>
+
+        <div class="flow-connector">
+          <div class="flow-arrow-label">room emit</div>
+          <div class="flow-arrow-line" style="border-color:#10b981; border-top-style:solid;"></div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num success">✓</div>
+          <div class="flow-vline"></div>
+          <div class="flow-box success">
+            <div class="flow-box-title">Terminal Render</div>
+            <div class="flow-box-sub">execution-result rendered in Output tab</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- TAB 2 — API & SOCKETS REFERENCE                       -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="tab-api" class="tab-content tab-section" style="display:none;">
+    <div class="stack" style="gap:20px;">
+
+      <!-- Auth API -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🔐</span> Authentication API <span class="card-meta">/api/auth</span></div>
+        <table>
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Body / Params</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/signup</td><td style="color:#94a3b8; font-size:12px;">None</td><td>Register account with email &amp; bcrypt password</td><td class="mono">name, email, password</td></tr>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/login</td><td style="color:#94a3b8; font-size:12px;">None</td><td>Email/password login → returns JWT + User object</td><td class="mono">email, password</td></tr>
+            <tr><td><span class="badge-get">GET</span></td><td class="mono">/google</td><td style="color:#94a3b8; font-size:12px;">None</td><td>Redirects to Google OAuth 2.0 consent screen</td><td class="mono">—</td></tr>
+            <tr><td><span class="badge-get">GET</span></td><td class="mono">/google/callback</td><td style="color:#94a3b8; font-size:12px;">None</td><td>Google OAuth callback → signs JWT → redirects to /oauth-success</td><td class="mono">?code=&amp;scope=</td></tr>
+            <tr><td><span class="badge-get">GET</span></td><td class="mono">/me</td><td><span class="tag tag-red">🔒 JWT</span></td><td>Fetch current authenticated user profile</td><td class="mono">—</td></tr>
+            <tr><td><span class="badge-patch">PATCH</span></td><td class="mono">/profile</td><td><span class="tag tag-red">🔒 JWT</span></td><td>Update user display name</td><td class="mono">displayName</td></tr>
+            <tr><td><span class="badge-put">PUT</span></td><td class="mono">/password</td><td><span class="tag tag-red">🔒 JWT</span></td><td>Update account password (verifies current password)</td><td class="mono">currentPassword, newPassword</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Room API -->
+      <div class="card">
+        <div class="card-title"><span class="icon">📁</span> Rooms API <span class="card-meta">/api/rooms</span> <span class="tag tag-red" style="margin-left:4px;">🔒 All require JWT</span></div>
+        <table>
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Body / Params</th><th>Access Control</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/create</td><td>Create collaborative room with unique 6-char code</td><td class="mono">—</td><td>Any Auth User (becomes Owner)</td></tr>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/join</td><td>Join existing room by code</td><td class="mono">roomId</td><td>Any Auth User (defaults to Editor/Viewer)</td></tr>
+            <tr><td><span class="badge-get">GET</span></td><td class="mono">/:roomId</td><td>Get room state (code, language, members)</td><td class="mono">:roomId in URL</td><td>Room Members only</td></tr>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/:roomId/leave</td><td>Leave room (triggers auto next-owner if owner leaves)</td><td class="mono">:roomId in URL</td><td>Room Members</td></tr>
+            <tr><td><span class="badge-patch">PATCH</span></td><td class="mono">/:roomId/role</td><td>Change member role (editor ↔ viewer)</td><td class="mono">targetUserId, role</td><td>Owner only</td></tr>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/:roomId/transfer</td><td>Transfer room ownership to another member</td><td class="mono">newOwnerId</td><td>Owner only</td></tr>
+            <tr><td><span class="badge-delete">DELETE</span></td><td class="mono">/:roomId/members/:userId</td><td>Kick/remove member from room</td><td class="mono">:roomId, :userId</td><td>Owner only</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Execution API -->
+      <div class="card">
+        <div class="card-title"><span class="icon">⚡</span> Execution API <span class="card-meta">/api/execute</span></div>
+        <table>
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Request Body / Response</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/execute</td><td><span class="tag tag-red">🔒 JWT</span></td><td>Executes code with custom stdin via Judge0 (or Docker fallback)</td><td class="mono">{ roomId, language, code, input } → { output, usage }</td></tr>
+            <tr><td><span class="badge-get">GET</span></td><td class="mono">/execute/usage</td><td><span class="tag tag-red">🔒 JWT</span></td><td>Fetches global platform daily executions used &amp; remaining</td><td class="mono">— → { date, used, limit: 50, remaining }</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- WebSocket Events -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🔌</span> Socket.IO Real-Time Event Matrix <span class="card-meta">Full Duplex</span></div>
+        <table>
+          <thead>
+            <tr><th>Direction</th><th>Event Name</th><th>Payload</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">join-room / rejoin-room</td><td class="mono">{ roomId }</td><td>Authenticates socket and joins Socket.IO room; clears disconnect timers</td></tr>
+            <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">code-change</td><td class="mono">{ roomId, code, language }</td><td>Emits live buffer change (debounced 120ms); saves to MongoDB</td></tr>
+            <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">cursor_move</td><td class="mono">{ roomId, position }</td><td>Emits cursor line/column coordinates (throttled 100ms)</td></tr>
+            <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">send-message</td><td class="mono">{ roomId, message }</td><td>Broadcasts chat message; persists in chatmessages collection</td></tr>
+            <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">leave-room</td><td class="mono">{ roomId }</td><td>Gracefully departs room and updates presence</td></tr>
+            <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">room-state</td><td class="mono">{ room, messages, rejoined }</td><td>Initial full snapshot upon entering room</td></tr>
+            <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">code-update</td><td class="mono">{ code, language, updatedBy }</td><td>Broadcasted to peers; sets remote Monaco content</td></tr>
+            <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">cursor_update</td><td class="mono">{ userId, displayName, color, position }</td><td>Renders remote multi-cursor flags in Monaco</td></tr>
+            <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">presence-updated</td><td class="mono">activeUsers[]</td><td>Renders online/offline indicators and member count</td></tr>
+            <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">execution-usage</td><td class="mono">{ date, used, limit, remaining }</td><td><strong>Global broadcast to all users in all rooms</strong> for daily counter</td></tr>
+            <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">execution-result</td><td class="mono">{ output, language, roomId }</td><td>Renders execution output in Output terminal tab</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- TAB 3 — DATA FLOW                                     -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="tab-dataflow" class="tab-content tab-section" style="display:none;">
+    <div class="grid-2">
+
+      <!-- Collaborative Editing Flow -->
+      <div class="card">
+        <div class="card-title"><span class="icon">✏️</span> Real-Time Collaborative Editing Flow</div>
+        <div class="stack">
+          <div class="flow-step-card" style="border-color:#bfdbfe; background:#eff6ff;">
+            <div class="step-num" style="background:#2563eb;">1</div>
+            <div>
+              <div class="step-title">Monaco onChange Event</div>
+              <div class="step-desc">User types in Monaco editor → updates local code state → schedules debounced sync (120ms).</div>
+            </div>
+          </div>
+          <div class="flow-step-card">
+            <div class="step-num" style="background:#2563eb;">2</div>
+            <div>
+              <div class="step-title">Socket code-change Emit</div>
+              <div class="step-desc">Client transmits { roomId, code, language } to backend socket server with user identity.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#ddd6fe; background:#faf5ff;">
+            <div class="step-num" style="background:#7c3aed;">3</div>
+            <div>
+              <div class="step-title">Backend Validation &amp; Persistence</div>
+              <div class="step-desc">Backend verifies caller has 'owner' or 'editor' role → updates Room document in MongoDB asynchronously.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#bbf7d0; background:#f0fdf4;">
+            <div class="step-num success" style="background:#10b981;">4</div>
+            <div>
+              <div class="step-title">Broadcast code-update</div>
+              <div class="step-desc">io.to(roomId).except(senderSocketId).emit("code-update") → remote peers update buffer without losing cursor position.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Execution & Stdin Flow -->
+      <div class="card">
+        <div class="card-title"><span class="icon">⚡</span> Sandboxed Execution with Stdin Pipeline</div>
+        <div class="stack">
+          <div class="flow-step-card">
+            <div class="step-num" style="background:#2563eb;">1</div>
+            <div>
+              <div class="step-title">Frontend Stdin Capture</div>
+              <div class="step-desc">User provides input in 'Input (stdin)' tab → clicks Run → switches tab to 'Output' and calls POST /api/execute.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#fed7aa; background:#fff7ed;">
+            <div class="step-num" style="background:#f59e0b;">2</div>
+            <div>
+              <div class="step-title">Rate Limit &amp; Daily Quota Check</div>
+              <div class="step-desc">Express checks 5 req/min rateLimiter + checks MongoDB DailyExecution. If remaining &lt;= 0, returns 429 quota error.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#bbf7d0; background:#f0fdf4;">
+            <div class="step-num" style="background:#10b981;">3</div>
+            <div>
+              <div class="step-title">Judge0 Base64 Execution</div>
+              <div class="step-desc">Encodes source_code and stdin into Base64 → POST /submissions?base64_encoded=true&amp;wait=true → decodes stdout/stderr/compilation errors.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#ddd6fe; background:#faf5ff;">
+            <div class="step-num success" style="background:#7c3aed;">4</div>
+            <div>
+              <div class="step-title">Atomic Usage Increment &amp; Global Broadcast</div>
+              <div class="step-desc">DailyExecution $inc: 1 → io.emit("execution-usage") broadcast to ALL users globally → io.to(roomId).emit("execution-result").</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remote Cursor Tracking Flow -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🖱️</span> Real-Time Multi-Cursor Synchronization</div>
+        <div class="stack">
+          <div class="flow-step-card">
+            <div class="step-num" style="background:#2563eb;">1</div>
+            <div>
+              <div class="step-title">Monaco onDidChangeCursorPosition</div>
+              <div class="step-desc">Detects cursor caret / line / column movements inside Monaco editor.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#fde68a; background:#fffbeb;">
+            <div class="step-num" style="background:#d97706;">2</div>
+            <div>
+              <div class="step-title">Client-side Throttle (100ms)</div>
+              <div class="step-desc">Prevents socket flooding by throttling cursor emissions to maximum 1 update per 100ms.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#bbf7d0; background:#f0fdf4;">
+            <div class="step-num success" style="background:#10b981;">3</div>
+            <div>
+              <div class="step-title">Monaco Delta Decorations</div>
+              <div class="step-desc">Remote clients receive cursor_update → renders custom CSS flag badge with peer's name &amp; color-coded cursor bar.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Room Departure & Ownership Transfer Flow -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🚪</span> Room Exit, Grace Period &amp; Owner Handover</div>
+        <div class="stack">
+          <div class="flow-step-card">
+            <div class="step-num" style="background:#2563eb;">1</div>
+            <div>
+              <div class="step-title">Exit Confirmation Guard</div>
+              <div class="step-desc">User clicks Exit button or hits browser Back (popstate) → window.confirm() dialog prevents accidental loss.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#fed7aa; background:#fff7ed;">
+            <div class="step-num" style="background:#f59e0b;">2</div>
+            <div>
+              <div class="step-title">5-Second Disconnect Grace Period</div>
+              <div class="step-desc">On socket disconnect, presenceStore waits 5000ms. If user reloads or reconnects within 5s, room state is preserved.</div>
+            </div>
+          </div>
+          <div class="flow-step-card" style="border-color:#ddd6fe; background:#faf5ff;">
+            <div class="step-num success" style="background:#7c3aed;">3</div>
+            <div>
+              <div class="step-title">Automated Next-Owner Election</div>
+              <div class="step-desc">If owner permanently leaves: pickNextOwner() promotes the next active senior member to 'owner' and notifies room.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- TAB 4 — DATABASE SCHEMA                               -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="tab-db" class="tab-content tab-section" style="display:none;">
+    <div class="grid-2">
+
+      <!-- users -->
+      <div class="schema-card">
+        <div class="schema-header">
+          <span style="font-size:22px;">👥</span>
+          <div>
+            <div class="schema-title">users collection</div>
+            <div class="schema-desc">Accounts collection supporting both local bcrypt credentials and Google OAuth 2.0.</div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <table>
+            <thead><tr><th>Field</th><th>Type</th><th>Constraint / Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-pk">_id</td><td class="col-type">ObjectId</td><td>PRIMARY KEY (MongoDB default)</td></tr>
+              <tr><td class="col-name">name</td><td class="col-type">String</td><td>User full name</td></tr>
+              <tr><td class="col-name">email</td><td class="col-type">String</td><td>UNIQUE · index: true · required</td></tr>
+              <tr><td class="col-name">password</td><td class="col-type">String</td><td>bcrypt hash (null for Google-only users)</td></tr>
+              <tr><td class="col-name">googleId</td><td class="col-type">String</td><td>UNIQUE · sparse index · Google OAuth ID</td></tr>
+              <tr><td class="col-name">avatar</td><td class="col-type">String</td><td>Profile photo URL</td></tr>
+              <tr><td class="col-name">createdAt</td><td class="col-type">Date</td><td>Mongoose timestamp</td></tr>
+              <tr><td class="col-name">updatedAt</td><td class="col-type">Date</td><td>Mongoose timestamp</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- rooms -->
+      <div class="schema-card">
+        <div class="schema-header">
+          <span style="font-size:22px;">📁</span>
+          <div>
+            <div class="schema-title">rooms collection</div>
+            <div class="schema-desc">Collaborative room state, shared code buffer, and embedded member roles.</div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <table>
+            <thead><tr><th>Field</th><th>Type</th><th>Constraint / Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-pk">_id</td><td class="col-type">ObjectId</td><td>PRIMARY KEY</td></tr>
+              <tr><td class="col-name">roomId</td><td class="col-type">String</td><td>UNIQUE · index: true · 6-char alphanumeric code</td></tr>
+              <tr><td class="col-fk">ownerId</td><td class="col-type">ObjectId</td><td>Reference → users._id</td></tr>
+              <tr><td class="col-name">code</td><td class="col-type">String</td><td>Active code buffer in Monaco</td></tr>
+              <tr><td class="col-name">language</td><td class="col-type">String</td><td>javascript, python, cpp, java, go, rust</td></tr>
+              <tr><td class="col-name">members</td><td class="col-type">Array&lt;Subdoc&gt;</td><td>[{ userId, role: 'owner'|'editor'|'viewer', joinedAt }]</td></tr>
+              <tr><td class="col-name">createdAt</td><td class="col-type">Date</td><td>Mongoose timestamp</td></tr>
+              <tr><td class="col-name">updatedAt</td><td class="col-type">Date</td><td>Mongoose timestamp</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- chatmessages -->
+      <div class="schema-card">
+        <div class="schema-header">
+          <span style="font-size:22px;">💬</span>
+          <div>
+            <div class="schema-title">chatmessages collection</div>
+            <div class="schema-desc">Persistent in-room conversation log loaded upon room entry.</div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <table>
+            <thead><tr><th>Field</th><th>Type</th><th>Constraint / Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-pk">_id</td><td class="col-type">ObjectId</td><td>PRIMARY KEY</td></tr>
+              <tr><td class="col-name">roomId</td><td class="col-type">String</td><td>index: true · room identifier</td></tr>
+              <tr><td class="col-fk">senderId</td><td class="col-type">ObjectId</td><td>Reference → users._id</td></tr>
+              <tr><td class="col-name">senderName</td><td class="col-type">String</td><td>Display name of message author</td></tr>
+              <tr><td class="col-name">text</td><td class="col-type">String</td><td>Message body content</td></tr>
+              <tr><td class="col-name">createdAt</td><td class="col-type">Date</td><td>Timestamp for chronologic sorting</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- dailyexecutions -->
+      <div class="schema-card">
+        <div class="schema-header">
+          <span style="font-size:22px;">⚡</span>
+          <div>
+            <div class="schema-title">dailyexecutions collection</div>
+            <div class="schema-desc">Global platform execution counter enforcing the 50 runs/day quota. Auto-resets at 00:00 UTC.</div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <table>
+            <thead><tr><th>Field</th><th>Type</th><th>Constraint / Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="col-pk">_id</td><td class="col-type">ObjectId</td><td>PRIMARY KEY</td></tr>
+              <tr><td class="col-pk">date</td><td class="col-type">String</td><td>UNIQUE · index: true · Format: 'YYYY-MM-DD' (UTC)</td></tr>
+              <tr><td class="col-name">count</td><td class="col-type">Number</td><td>Atomic increment ($inc: 1) on every run</td></tr>
+              <tr><td class="col-name">limit</td><td class="col-type">Number</td><td>Default: 50 runs per day</td></tr>
+              <tr><td class="col-name">createdAt</td><td class="col-type">Date</td><td>Timestamp</td></tr>
+              <tr><td class="col-name">updatedAt</td><td class="col-type">Date</td><td>Timestamp</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin: 14px 18px 18px; padding: 14px 16px; background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 10px;">
+          <div style="font-size: 12px; font-weight: 800; color: #9a3412; margin-bottom: 8px;">⚡ Platform-Wide Quota Architecture</div>
+          <div style="font-size: 12px; color: #7c2d12; display: flex; flex-direction: column; gap: 5px;">
+            <div><span style="font-weight:700;">Atomic Operations:</span> Uses findOneAndUpdate({ date }, { $inc: { count: 1 } }, { upsert: true }) to prevent race conditions during concurrent runs.</div>
+            <div><span style="font-weight:700;">Global Synchronization:</span> Backend uses io.emit("execution-usage") to update all connected sockets across all rooms simultaneously in real-time.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- end page-wrapper -->
+
+<!-- ─── Detail Drawer ──────────────────────────────────── -->
+<div class="drawer-overlay no-print" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer no-print" id="drawer" style="display:none;">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-title" id="d-title"></div>
+      <div class="drawer-path"  id="d-path"></div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-items" id="d-body"></div>
+</div>
+
+<script>
+  /* ── Tab switching ─────────────────────────────────── */
+  const TABS = ['overview','api','dataflow','db'];
+  function showTab(name) {
+    TABS.forEach(t => {
+      document.getElementById('tab-' + t).style.display = (t === name) ? '' : 'none';
+    });
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      const active = TABS[i] === name;
+      btn.classList.toggle('active', active);
+    });
+  }
+
+  /* ── Drawer data ───────────────────────────────────── */
+  const DETAILS = {
+    'editor-page': {
+      title: '💻 Editor (/editor/:roomId)',
+      path: 'Frontend/src/pages/Editor.jsx',
+      items: [
+        'Main workspace integrating Microsoft Monaco Editor with side-by-side output/input panel',
+        'Multi-cursor remote rendering: listens for cursor_update and decorates Monaco carets with peer names & avatars',
+        'Exit confirmation guard: popstate (browser back) and beforeunload interceptors prevent accidental room departure',
+        'Dynamic silent code download mapping current language to file extension (main.py, main.js, main.cpp, etc.)',
+        'Real-time socket subscriptions for code-update, execution-result, presence-updated, and execution-usage',
+      ]
+    },
+    'dashboard-page': {
+      title: '📊 Dashboard (/dashboard)',
+      path: 'Frontend/src/pages/Dashboard.jsx',
+      items: [
+        'Protected view requiring authenticated user session',
+        'Instant room creation: generates unique 6-character room codes via backend POST /api/rooms/create',
+        'Direct room joining: input code validation with automated uppercase normalization',
+        'Account profile management: update display name, sync local/OAuth credentials, and change password',
+      ]
+    },
+    'home-page': {
+      title: '🏠 Home (/)',
+      path: 'Frontend/src/pages/Home.jsx',
+      items: [
+        'Interactive landing page with live Monaco code editor playground',
+        'Feature showcase bento grid: multi-cursor collaboration, Docker sandboxing, role permissions, in-room chat',
+        'Public exploration route encouraging room creation and live collaboration',
+      ]
+    },
+    'auth-pages': {
+      title: '🔐 Login / Signup / OAuth',
+      path: 'Frontend/src/pages/Login.jsx · Signup.jsx · OAuthSuccess.jsx',
+      items: [
+        'Local email/password authentication using bcrypt hash verification',
+        'Google OAuth 2.0 flow: redirects to Google consent screen, returns via OAuthSuccess.jsx',
+        'OAuthSuccess extracts token from URL params, persists to localStorage, and updates AuthContext',
+      ]
+    },
+    'monaco-comp': {
+      title: '🖥️ CodeEditor Component',
+      path: 'Frontend/src/components/CodeEditor.jsx',
+      items: [
+        'Wraps @monaco-editor/react with custom dark theme (#1A2232 background matching CollabX palette)',
+        'Supports 6 language syntax highlighters: Python, JavaScript, C++, Java, Go, Rust',
+        'Renders remote peer cursors using Monaco DeltaDecorations API with custom CSS badges',
+        'Emits local cursor movements (throttled at 100ms) and text changes (debounced at 120ms)',
+      ]
+    },
+    'output-comp': {
+      title: '📟 Output Component (Dual Tabs)',
+      path: 'Frontend/src/components/Output.jsx',
+      items: [
+        'Features interactive tabs: "Output" (terminal stdout/stderr) and "Input (stdin)" (custom pre-supplied test cases)',
+        'Active indicator dot glows green whenever stdin textarea has custom content populated',
+        'Auto-switches to "Output" tab upon clicking Run to show execution progress immediately',
+        'Displays spinner and real-time running indicator during remote code execution',
+      ]
+    },
+    'header-comp': {
+      title: '🏷️ Header Component',
+      path: 'Frontend/src/components/Header.jsx',
+      items: [
+        'Static brand identity: CollabX logo is non-clickable to prevent accidental navigation',
+        'Room ID copy chip with animated "Copied!" confirmation badge',
+        'Silent Code Download button: instantly saves file without browser alerts or popups',
+        'Language dropdown supporting Python, JavaScript, C++, Java, Go, and Rust',
+        'Live Daily Runs Counter badge (e.g. 14/50 runs) with dynamic color warning when quota is low',
+        'Guard-protected Room Exit button (door icon) with explicit confirmation modal',
+      ]
+    },
+    'chat-comp': {
+      title: '💬 Chat Drawer Component',
+      path: 'Frontend/src/components/Chat.jsx',
+      items: [
+        'Collapsible sliding side drawer for in-room real-time team conversation',
+        'Displays user avatars, author names, timestamps, and bubble styling',
+        'Auto-scrolls to latest message on incoming socket receive-message event',
+      ]
+    },
+    'participants-comp': {
+      title: '👥 Participants Drawer Component',
+      path: 'Frontend/src/components/Participants.jsx',
+      items: [
+        'Lists all active room members with color-coded initials and online status indicators',
+        'Clean text role badges: Owner (Amber), Editor (Green), Viewer (Slate)',
+        'Role management dropdown: Owner can toggle member roles between Editor and Viewer',
+        'Transfer Ownership action: allows room creator to hand over primary room control',
+      ]
+    },
+    'auth-ctx': {
+      title: '🧠 AuthContext',
+      path: 'Frontend/src/context/auth-context.jsx',
+      items: [
+        'React Context providing: user, token, isAuthenticated, login, signup, logout, googleLogin',
+        'Synchronizes authentication token across localStorage and Axios default headers',
+        'Provides updateProfile and changePassword API bindings',
+      ]
+    },
+    'socket-client': {
+      title: '⚡ Socket.IO Client Singleton',
+      path: 'Frontend/src/socket/socket.js',
+      items: [
+        'Configured with autoConnect: false to ensure connection only occurs with valid JWT token',
+        'Token passed in socket.handshake.auth.token for secure server-side handshake verification',
+        'Handles auto-reconnection and room re-joining on connection drop',
+      ]
+    },
+    'auth-ctrl': {
+      title: '🔐 Auth Controller & Routes',
+      path: 'Backend/src/controllers/authController.js · routes/authRoutes.js',
+      items: [
+        'POST /signup: hashes password with bcrypt (salt 10) → creates User in MongoDB → signs JWT',
+        'POST /login: finds user by email → bcrypt.compare → returns signed JWT with 7d expiration',
+        'GET /google & /google/callback: Passport.js GoogleStrategy handles OAuth 2.0 handshake',
+        'PATCH /profile & PUT /password: user account security and profile name management',
+      ]
+    },
+    'room-ctrl': {
+      title: '📁 Room Controller & Routes',
+      path: 'Backend/src/controllers/roomController.js · routes/roomRoutes.js',
+      items: [
+        'POST /create: generates random 6-character room code; assigns creator as Owner',
+        'POST /join: validates room existence; adds caller to members list if not already present',
+        'GET /:roomId: checks membership via assertRoomMember; returns room state snapshot',
+        'PATCH /:roomId/role & POST /:roomId/transfer: enforces RBAC (only current owner can modify)',
+      ]
+    },
+    'execute-ctrl': {
+      title: '⚡ Execute Controller & Routes',
+      path: 'Backend/src/controllers/executeController.js · routes/executeRoutes.js',
+      items: [
+        'POST /execute: validates roomId and user membership → checks daily quota (usageService)',
+        'Calls executionService.executeCode(language, code, input)',
+        'Increments daily usage counter atomically in MongoDB',
+        'Broadcasts execution-result to room and execution-usage globally to all connected sockets',
+        'GET /execute/usage: returns current date execution stats ({ used, limit: 50, remaining })',
+      ]
+    },
+    'socket-handler': {
+      title: '🔌 socketHandler & presenceStore',
+      path: 'Backend/src/sockets/socketHandler.js · presenceStore.js',
+      items: [
+        'JWT handshake authentication middleware: verifies token on every incoming socket connection',
+        'presenceStore tracks active users, socket IDs, display names, and assigned roles per room',
+        '5-second disconnect grace period: prevents premature departure during quick page reloads',
+        'pickNextOwner: automatically promotes the next active member if room owner disconnects',
+        'Emits global daily execution quota snapshot to every newly connecting socket',
+      ]
+    },
+    'exec-svc': {
+      title: '⚙️ executionService',
+      path: 'Backend/src/services/executionService.js',
+      items: [
+        'Pluggable Strategy Pattern: routes to Judge0 Cloud/Self-Hosted API or local Docker sandbox',
+        'Defaults to Judge0 runner for zero-server-maintenance cloud execution on Render/Vercel',
+        'Configurable fallback to local Docker runner via ENABLE_DOCKER_FALLBACK env var',
+      ]
+    },
+    'usage-svc': {
+      title: '📈 usageService',
+      path: 'Backend/src/services/usageService.js',
+      items: [
+        'Manages platform-wide daily code execution quota (50 runs/day limit)',
+        'Queries MongoDB DailyExecution model by current UTC date string (YYYY-MM-DD)',
+        'Atomic upsert ($inc: { count: 1 }) prevents race conditions under concurrent executions',
+        'Resets automatically at 00:00 UTC without requiring cron jobs',
+      ]
+    },
+    'room-svc': {
+      title: '🚪 roomService & chatService',
+      path: 'Backend/src/services/roomService.js · chatService.js',
+      items: [
+        'roomService: manages room creation, membership arrays, role validation, and code buffer persistence',
+        'chatService: stores and retrieves in-room chat messages from MongoDB chatmessages collection',
+      ]
+    },
+    'auth-mw': {
+      title: '🛡️ Auth Middleware (JWT)',
+      path: 'Backend/src/middleware/authMiddleware.js · utils/jwt.js',
+      items: [
+        'Extracts Bearer token from HTTP Authorization header',
+        'Verifies signature and expiration using jsonwebtoken (JWT_SECRET)',
+        'Attaches decoded { id, email } payload to req.user for downstream controllers',
+      ]
+    },
+    'rate-limiter': {
+      title: '⏱️ Rate Limiter Middleware',
+      path: 'Backend/src/utils/rateLimiter.js',
+      items: [
+        'Protects /api/execute endpoint using express-rate-limit',
+        'Limits each user (or IP) to a maximum of 5 code execution requests per minute',
+        'Returns 429 Too Many Requests to prevent API spamming',
+      ]
+    },
+    'judge0-engine': {
+      title: '⚖️ Judge0 Cloud & Self-Hosted Runner',
+      path: 'Backend/src/utils/judge0Runner.js',
+      items: [
+        'Sends POST /submissions?base64_encoded=true&wait=true to Judge0 API',
+        'Encodes source_code and custom stdin to Base64 to safely handle multi-line inputs and escape sequences',
+        'Decodes Base64 outputs: stdout, stderr, compile_output, message, and execution status',
+        'Gracefully handles Compilation Errors (6), Time Limit Exceeded (5), and Runtime Errors (7-14)',
+        'Supports optional X-Auth-Token / RapidAPI headers and async token polling fallback',
+      ]
+    },
+    'docker-engine': {
+      title: '🐳 Docker Local Sandbox Runner',
+      path: 'Backend/src/utils/dockerRunner.js',
+      items: [
+        'Generates isolated ephemeral directory temp/<jobId> for each execution',
+        'Writes source code file and input.txt before launching container',
+        'Executes with strict security flags: --memory="128m" --cpus="0.5" --network=none',
+        'Redirects input file into execution command: <runCommand> < input.txt',
+        'Automatically purges temp folder in finally block (rmSync)',
+      ]
+    },
+    'google-oauth': {
+      title: '🔑 Google OAuth 2.0 Integration',
+      path: 'Backend/src/config/passport.js',
+      items: [
+        'Passport GoogleStrategy using GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET',
+        'Finds or creates User record in MongoDB using profile.id and profile.emails[0].value',
+        'Generates JWT token and redirects user to Frontend OAuthSuccess landing page',
+      ]
+    },
+    'schema-users': {
+      title: '👥 users Collection Schema',
+      path: 'Backend/src/models/User.js',
+      items: [
+        'Stores credentials for local and OAuth users',
+        'email (unique, indexed), name, avatar, password (bcrypt hash, optional for OAuth)',
+        'googleId (unique, sparse index for Google OAuth users)',
+        'Mongoose timestamps (createdAt, updatedAt)',
+      ]
+    },
+    'schema-rooms': {
+      title: '📁 rooms Collection Schema',
+      path: 'Backend/src/models/Room.js',
+      items: [
+        'roomId: unique 6-character alphanumeric code (indexed for sub-millisecond lookup)',
+        'ownerId: reference to User document who owns the room',
+        'code: current text content buffer in Monaco editor',
+        'language: active language mode (javascript, python, cpp, java, go, rust)',
+        'members: embedded subdocument array [{ userId, role, joinedAt }]',
+      ]
+    },
+    'schema-chat': {
+      title: '💬 chatmessages Collection Schema',
+      path: 'Backend/src/models/ChatMessage.js',
+      items: [
+        'roomId: indexed string associating message with room',
+        'senderId: reference to author User document',
+        'senderName: cached display name for efficient retrieval',
+        'text: chat content string',
+        'createdAt: timestamp for chronological ordering',
+      ]
+    },
+    'schema-usage': {
+      title: '⚡ dailyexecutions Collection Schema',
+      path: 'Backend/src/models/DailyExecution.js',
+      items: [
+        'date: unique string in YYYY-MM-DD format (indexed)',
+        'count: integer tracking total executions on that calendar day across all users',
+        'limit: integer ceiling (defaults to 50 runs/day)',
+        'Atomic upsert operation ($inc) guarantees thread-safe counting without race conditions',
+      ]
+    },
+  };
+
+  function openDrawer(key) {
+    const d = DETAILS[key];
+    if (!d) return;
+    document.getElementById('d-title').textContent = d.title;
+    document.getElementById('d-path').textContent = d.path;
+    document.getElementById('d-body').innerHTML = d.items.map(item =>
+      `<div class="drawer-item"><span class="drawer-bullet">›</span><span class="drawer-text">${item}</span></div>`
+    ).join('');
+    document.getElementById('drawer').style.display = 'block';
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').style.display = 'none';
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  /* ── Download as self-contained HTML ───────────────── */
+  function downloadHTML() {
+    const html = document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'CollabX_Architecture.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
+
+</body>
+</html>
