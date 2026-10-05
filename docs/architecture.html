@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,85 +8,197 @@
   <style>
     /* ── Reset & Base ───────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root[data-theme="dark"] {
+      --bg-base: #0B0F19;
+      --bg-surface: #111827;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --bg-card-sub: rgba(30, 41, 59, 0.65);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(56, 189, 248, 0.4);
+      --text-main: #F3F4F6;
+      --text-muted: #94A3B8;
+      --text-subtle: #64748B;
+      --accent: #38BDF8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --badge-bg: rgba(56, 189, 248, 0.1);
+      --tab-bg: rgba(15, 23, 42, 0.8);
+      --table-hover: rgba(255, 255, 255, 0.03);
+      --drawer-bg: #0F172A;
+    }
+
+    :root[data-theme="light"] {
+      --bg-base: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --bg-card: #FFFFFF;
+      --bg-card-sub: #F1F5F9;
+      --border-subtle: #E2E8F0;
+      --border-hover: #93C5FD;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --text-subtle: #94A3B8;
+      --accent: #0284C7;
+      --accent-glow: rgba(2, 132, 199, 0.15);
+      --badge-bg: #E0F2FE;
+      --tab-bg: #EDF2F7;
+      --table-hover: #F8FAFC;
+      --drawer-bg: #FFFFFF;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-main);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.06), transparent 35%),
+        radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.06), transparent 35%);
+      background-attachment: fixed;
     }
 
     /* ── Layout ─────────────────────────────────────────── */
-    .page-wrapper { max-width: 1240px; margin: 0 auto; padding: 32px 28px 60px; }
+    .page-wrapper { max-width: 1260px; margin: 0 auto; padding: 36px 28px 70px; }
 
     /* ── Header ─────────────────────────────────────────── */
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-    .header-left { display: flex; align-items: center; gap: 14px; }
-    .header-icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      background: #2563eb; display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 22px; flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 30px; padding: 20px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     }
-    .header-title { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.025em; line-height: 1.2; }
-    .header-sub { font-size: 13px; color: #64748b; margin-top: 3px; font-weight: 400; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: linear-gradient(135deg, #0284C7, #2563EB);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 22px; font-weight: 900; flex-shrink: 0;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+      letter-spacing: -1px;
+    }
+    .header-title {
+      font-size: 23px; font-weight: 800; color: var(--text-main);
+      letter-spacing: -0.025em; line-height: 1.2;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .header-tag {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; padding: 3px 8px; border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15); color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 400; }
     .header-actions { display: flex; gap: 10px; align-items: center; }
 
     /* ── Buttons ─────────────────────────────────────────── */
     .btn {
       display: inline-flex; align-items: center; gap: 7px;
-      padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600;
-      cursor: pointer; border: none; transition: all 0.15s ease; text-decoration: none;
-      line-height: 1;
+      padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.18s ease; text-decoration: none;
+      line-height: 1; user-select: none;
     }
-    .btn-primary { background: #2563eb; color: #fff; }
-    .btn-primary:hover { background: #1d4ed8; }
-    .btn-outline { background: #fff; color: #374151; border: 1.5px solid #d1d5db; }
-    .btn-outline:hover { background: #f9fafb; border-color: #9ca3af; }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284C7, #2563EB);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      background: var(--bg-card-sub);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+    .btn-outline:hover {
+      background: var(--table-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
+    }
+    .theme-toggle-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-card-sub); border: 1px solid var(--border-subtle);
+      color: var(--text-main); font-size: 16px; cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .theme-toggle-btn:hover { border-color: var(--accent); transform: scale(1.05); }
 
     /* ── Tabs ────────────────────────────────────────────── */
-    .tab-bar { display: flex; gap: 6px; margin-bottom: 24px; }
-    .tab-btn {
-      padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
-      cursor: pointer; border: 1.5px solid #e2e8f0; background: #fff;
-      color: #64748b; transition: all 0.15s ease; line-height: 1;
+    .tab-bar {
+      display: inline-flex; gap: 5px; margin-bottom: 24px;
+      background: var(--tab-bg); padding: 5px; border-radius: 12px;
+      border: 1px solid var(--border-subtle); backdrop-filter: blur(8px);
     }
-    .tab-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
-    .tab-btn:not(.active):hover { background: #f1f5f9; color: #334155; }
+    .tab-btn {
+      padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; background: transparent;
+      color: var(--text-muted); transition: all 0.18s ease; line-height: 1;
+      display: inline-flex; align-items: center; gap: 7px;
+    }
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+      font-weight: 700;
+    }
+    .tab-btn:not(.active):hover { color: var(--text-main); }
 
     /* ── Cards & Sections ────────────────────────────────── */
     .card {
-      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px;
-      padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
+      opacity: 0.5;
     }
     .card-title {
-      font-size: 16px; font-weight: 700; color: #0f172a;
+      font-size: 16px; font-weight: 700; color: var(--text-main);
       display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
     }
     .card-title .icon { font-size: 20px; }
-    .card-sub { font-size: 12px; color: #94a3b8; font-weight: 500; }
+    .card-sub { font-size: 12px; color: var(--text-muted); font-weight: 500; }
     .card-meta {
-      font-family: 'SF Mono', 'Fira Mono', monospace;
-      font-size: 12px; background: #f1f5f9; color: #374151;
-      padding: 3px 9px; border-radius: 6px; border: 1px solid #e2e8f0;
-      font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px; background: var(--bg-card-sub); color: var(--text-muted);
+      padding: 3px 9px; border-radius: 6px; border: 1px solid var(--border-subtle);
+      font-weight: 600;
     }
     .section-label {
-      font-size: 10px; font-weight: 800; letter-spacing: 0.1em;
-      text-transform: uppercase; color: #94a3b8; margin-bottom: 10px;
+      font-size: 10px; font-weight: 800; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-subtle); margin-bottom: 10px;
     }
 
     /* ── Node Cards ──────────────────────────────────────── */
     .node {
-      background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px;
-      padding: 11px 14px; cursor: pointer; transition: all 0.18s ease;
-      display: flex; align-items: flex-start; gap: 11px;
+      background: var(--bg-card-sub);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 14px; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; align-items: flex-start; gap: 12px;
     }
-    .node:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); border-color: #93c5fd; }
+    .node:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      border-color: var(--border-hover);
+    }
     .node-icon { font-size: 22px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
-    .node-name { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.3; }
-    .node-desc { font-size: 11.5px; color: #64748b; margin-top: 2px; line-height: 1.4; }
-    .node-sub  { font-size: 11px; color: #94a3b8; margin-top: 1px; line-height: 1.4; }
+    .node-name { font-size: 13px; font-weight: 700; color: var(--text-main); line-height: 1.3; }
+    .node-desc { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; line-height: 1.45; }
+    .node-sub  { font-size: 11px; color: var(--text-subtle); margin-top: 1px; line-height: 1.4; font-family: 'JetBrains Mono', monospace; }
 
     /* ── Tags & Badges ───────────────────────────────────── */
     .tag {
@@ -95,19 +207,18 @@
       padding: 3px 9px; border-radius: 999px;
       line-height: 1.2;
     }
-    .tag-blue    { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-    .tag-purple  { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
-    .tag-green   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-    .tag-slate   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-    .tag-red     { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; font-size: 11px; }
-    .tag-orange  { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-    .tag-emerald { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
-    .badge-get    { background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
-    .badge-post   { background: #f0fdf4; color: #15803d; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
-    .badge-patch  { background: #fefce8; color: #a16207; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
-    .badge-put    { background: #faf5ff; color: #6d28d9; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
-    .badge-delete { background: #fff1f2; color: #be123c; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
-    .badge-ws     { background: #ede9fe; color: #6d28d9; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .tag-blue    { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); }
+    .tag-purple  { background: rgba(168, 85, 247, 0.12); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.25); }
+    .tag-green   { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.25); }
+    .tag-slate   { background: var(--bg-card-sub); color: var(--text-muted); border: 1px solid var(--border-subtle); }
+    .tag-red     { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 11px; }
+    .tag-orange  { background: rgba(249, 115, 22, 0.12); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.25); }
+    .badge-get    { background: rgba(59, 130, 246, 0.15); color: #60a5fa; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-post   { background: rgba(34, 197, 94, 0.15); color: #4ade80; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-patch  { background: rgba(234, 179, 8, 0.15); color: #facc15; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-put    { background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-delete { background: rgba(239, 68, 68, 0.15); color: #f87171; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
+    .badge-ws     { background: rgba(147, 51, 234, 0.15); color: #c084fc; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 5px; font-family: monospace; }
 
     /* ── Grid layouts ────────────────────────────────────── */
     .grid-3  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
@@ -116,92 +227,102 @@
     .wrap    { display: flex; flex-wrap: wrap; gap: 8px; }
 
     /* ── Flow Timeline ───────────────────────────────────── */
-    .flow-row { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding-bottom: 4px; }
-    .flow-step { display: flex; flex-direction: column; align-items: center; min-width: 135px; }
+    .flow-row { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding-bottom: 8px; }
+    .flow-step { display: flex; flex-direction: column; align-items: center; min-width: 140px; }
     .flow-num {
-      width: 36px; height: 36px; border-radius: 50%; background: #2563eb;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #0284C7, #2563EB);
       color: #fff; font-size: 13px; font-weight: 800;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
     }
-    .flow-num.success { background: #10b981; }
-    .flow-vline { width: 1px; height: 12px; background: #e2e8f0; }
+    .flow-num.success {
+      background: linear-gradient(135deg, #10B981, #059669);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+    .flow-vline { width: 1px; height: 12px; background: var(--border-subtle); }
     .flow-box {
-      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px;
-      padding: 10px 12px; text-align: center; width: 124px;
+      background: var(--bg-card-sub); border: 1px solid var(--border-subtle); border-radius: 12px;
+      padding: 10px 12px; text-align: center; width: 128px;
     }
-    .flow-box.success { background: #f0fdf4; border-color: #bbf7d0; }
-    .flow-box-title { font-size: 12px; font-weight: 700; color: #0f172a; line-height: 1.3; }
-    .flow-box-sub   { font-size: 10.5px; color: #64748b; margin-top: 3px; line-height: 1.4; }
+    .flow-box.success {
+      border-color: rgba(34, 197, 94, 0.3);
+      background: rgba(34, 197, 94, 0.08);
+    }
+    .flow-box-title { font-size: 12px; font-weight: 700; color: var(--text-main); line-height: 1.3; }
+    .flow-box-sub   { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
     .flow-connector {
       display: flex; align-items: center; flex-direction: column;
-      min-width: 54px; margin-top: 17px;
+      min-width: 56px; margin-top: 17px;
     }
-    .flow-arrow-line { flex: 1; border-top: 2px dashed #cbd5e1; min-width: 54px; }
-    .flow-arrow-label { font-size: 10px; font-weight: 700; color: #94a3b8; white-space: nowrap; margin-bottom: 2px; }
+    .flow-arrow-line { flex: 1; border-top: 2px dashed var(--border-subtle); min-width: 56px; }
+    .flow-arrow-label { font-size: 10px; font-weight: 700; color: var(--text-subtle); white-space: nowrap; margin-bottom: 2px; }
 
     /* ── Table ───────────────────────────────────────────── */
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead tr { border-bottom: 2px solid #e2e8f0; }
-    thead th { text-align: left; padding: 10px 14px; font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
-    tbody tr { border-bottom: 1px solid #f1f5f9; }
-    tbody tr:hover { background: #fafafa; }
-    tbody td { padding: 10px 14px; color: #374151; vertical-align: middle; }
-    td.mono   { font-family: 'SF Mono', 'Fira Mono', monospace; font-size: 12px; color: #1e293b; }
+    thead tr { border-bottom: 1.5px solid var(--border-subtle); }
+    thead th { text-align: left; padding: 10px 14px; font-size: 11.5px; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.06em; }
+    tbody tr { border-bottom: 1px solid var(--border-subtle); }
+    tbody tr:hover { background: var(--table-hover); }
+    tbody td { padding: 11px 14px; color: var(--text-muted); vertical-align: middle; }
+    td.mono   { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-main); }
 
     /* ── Detail Drawer ───────────────────────────────────── */
     .drawer-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 900;
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 900;
+      backdrop-filter: blur(4px);
     }
     .drawer-overlay.open { display: block; }
     .drawer {
       position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 100%; max-width: 700px; z-index: 901;
-      background: #fff; border-radius: 20px 20px 0 0;
-      border: 1.5px solid #e2e8f0; border-bottom: none;
-      padding: 24px 28px 32px;
-      box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
-      transition: transform 0.25s ease;
-      max-height: 80vh; overflow-y: auto;
+      width: 100%; max-width: 720px; z-index: 901;
+      background: var(--drawer-bg); border-radius: 20px 20px 0 0;
+      border: 1px solid var(--border-subtle); border-bottom: none;
+      padding: 24px 28px 34px;
+      box-shadow: 0 -12px 50px rgba(0,0,0,0.4);
+      max-height: 82vh; overflow-y: auto;
     }
-    .drawer-handle { width: 40px; height: 4px; background: #e2e8f0; border-radius: 9px; margin: 0 auto 18px; }
-    .drawer-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-    .drawer-title { font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.3; }
-    .drawer-path  { font-size: 11.5px; color: #94a3b8; margin-top: 3px; font-family: monospace; }
+    .drawer-handle { width: 44px; height: 5px; background: var(--border-subtle); border-radius: 9px; margin: 0 auto 18px; }
+    .drawer-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .drawer-title { font-size: 17px; font-weight: 800; color: var(--text-main); line-height: 1.3; }
+    .drawer-path  { font-size: 11.5px; color: var(--accent); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
     .drawer-close {
-      width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9;
-      border: none; cursor: pointer; font-size: 16px; display: flex;
-      align-items: center; justify-content: center; color: #64748b; flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 8px; background: var(--bg-card-sub);
+      border: 1px solid var(--border-subtle); cursor: pointer; font-size: 16px; display: flex;
+      align-items: center; justify-content: center; color: var(--text-muted); flex-shrink: 0;
+      transition: all 0.15s ease;
     }
-    .drawer-close:hover { background: #e2e8f0; color: #0f172a; }
-    .drawer-items { display: flex; flex-direction: column; gap: 8px; }
+    .drawer-close:hover { border-color: var(--accent); color: var(--text-main); }
+    .drawer-items { display: flex; flex-direction: column; gap: 9px; }
     .drawer-item  { display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
-    .drawer-bullet { color: #2563eb; font-weight: 800; margin-top: 1px; flex-shrink: 0; }
-    .drawer-text  { font-size: 13px; color: #374151; }
+    .drawer-bullet { color: var(--accent); font-weight: 800; margin-top: 1px; flex-shrink: 0; }
+    .drawer-text  { font-size: 13px; color: var(--text-muted); }
 
     /* ── DB Schema ───────────────────────────────────────── */
     .schema-card {
-      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px;
-      overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px;
+      overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     }
     .schema-header {
       padding: 14px 18px 12px;
-      border-bottom: 1.5px solid #f1f5f9;
+      border-bottom: 1px solid var(--border-subtle);
       display: flex; align-items: center; gap: 10px;
+      background: var(--bg-card-sub);
     }
-    .schema-title { font-size: 14px; font-weight: 800; color: #0f172a; }
-    .schema-desc  { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
+    .schema-title { font-size: 14px; font-weight: 800; color: var(--text-main); }
+    .schema-desc  { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
     .schema-table table { font-size: 12px; }
     .schema-table thead th { font-size: 10.5px; padding: 8px 14px; }
-    .schema-table tbody td { padding: 7px 14px; }
-    .col-pk   { font-family: monospace; font-weight: 800; color: #d97706; }
-    .col-fk   { font-family: monospace; font-weight: 700; color: #3b82f6; }
-    .col-name { font-family: monospace; color: #1e293b; }
-    .col-type { font-family: monospace; color: #64748b; }
+    .schema-table tbody td { padding: 8px 14px; }
+    .col-pk   { font-family: monospace; font-weight: 800; color: #fbbf24; }
+    .col-fk   { font-family: monospace; font-weight: 700; color: #38bdf8; }
+    .col-name { font-family: monospace; color: var(--text-main); }
+    .col-type { font-family: monospace; color: var(--text-muted); }
 
     /* ── Data Flow Step ──────────────────────────────────── */
     .flow-step-card {
       display: flex; gap: 14px; align-items: flex-start;
-      background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px;
+      background: var(--bg-card-sub); border: 1px solid var(--border-subtle); border-radius: 12px;
       padding: 13px 16px;
     }
     .step-num {
@@ -209,16 +330,24 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 12px; font-weight: 800; color: #fff; margin-top: 1px;
     }
-    .step-title { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.3; }
-    .step-desc  { font-size: 12px; color: #64748b; margin-top: 3px; line-height: 1.5; }
+    .step-title { font-size: 13px; font-weight: 700; color: var(--text-main); line-height: 1.3; }
+    .step-desc  { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+
+    /* ── Responsive adjustments ──────────────────────────── */
+    @media (max-width: 900px) {
+      .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .header-actions { width: 100%; justify-content: space-between; }
+    }
 
     /* ── Print / Export ──────────────────────────────────── */
     @media print {
       .no-print { display: none !important; }
       .drawer-overlay, .drawer { display: none !important; }
-      body { background: #fff; }
+      body { background: #fff !important; color: #000 !important; }
       .tab-content { display: block !important; page-break-inside: avoid; }
       .tab-section { margin-bottom: 40px; }
+      .card { border: 1px solid #ccc !important; box-shadow: none !important; }
     }
   </style>
 </head>
@@ -229,24 +358,28 @@
   <!-- ─── Header ─────────────────────────────────────────── -->
   <div class="header">
     <div class="header-left">
-      <div class="header-icon">&lt;/&gt;</div>
+      <div class="header-icon">&lt;X&gt;</div>
       <div>
-        <div class="header-title">CollabX — Architecture Diagram</div>
-        <div class="header-sub">Real-Time Collaborative Code Editor &amp; Sandboxed Execution Platform &nbsp;·&nbsp; React &nbsp;·&nbsp; Node.js &nbsp;·&nbsp; Socket.IO &nbsp;·&nbsp; Judge0 &nbsp;·&nbsp; MongoDB</div>
+        <div class="header-title">
+          <span>CollabX</span>
+          <span class="header-tag">Interactive Architecture</span>
+        </div>
+        <div class="header-sub">Real-Time Collaborative Code Editor &amp; Sandboxed Execution System &nbsp;·&nbsp; React &nbsp;·&nbsp; Node.js &nbsp;·&nbsp; Socket.IO &nbsp;·&nbsp; Judge0 &nbsp;·&nbsp; MongoDB</div>
       </div>
     </div>
     <div class="header-actions no-print">
+      <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Switch Light/Dark Mode">☀️</button>
       <button class="btn btn-outline" onclick="window.print()">🖨️ &nbsp;Print / PDF</button>
-      <button class="btn btn-primary" onclick="downloadHTML()">⬇️ &nbsp;Download HTML</button>
+      <button class="btn btn-primary" onclick="downloadHTML()">⬇️ &nbsp;Export HTML</button>
     </div>
   </div>
 
   <!-- ─── Tabs ────────────────────────────────────────────── -->
   <div class="tab-bar no-print">
-    <button class="tab-btn active" onclick="showTab('overview')">System Overview</button>
-    <button class="tab-btn"        onclick="showTab('api')">API &amp; Sockets</button>
-    <button class="tab-btn"        onclick="showTab('dataflow')">Data Flow</button>
-    <button class="tab-btn"        onclick="showTab('db')">Database Schema</button>
+    <button class="tab-btn active" onclick="showTab('overview')"><span>💻</span> System Overview</button>
+    <button class="tab-btn"        onclick="showTab('api')"><span>🔌</span> API &amp; Socket Matrix</button>
+    <button class="tab-btn"        onclick="showTab('dataflow')"><span>⚡</span> Lifecycle Data Flows</button>
+    <button class="tab-btn"        onclick="showTab('db')"><span>🍃</span> MongoDB Schemas</button>
   </div>
 
   <!-- ══════════════════════════════════════════════════════ -->
@@ -255,93 +388,90 @@
   <div id="tab-overview" class="tab-content tab-section">
 
     <!-- 3-column layout -->
-    <div class="grid-3" style="margin-bottom: 20px;">
+    <div class="grid-3" style="margin-bottom: 22px;">
 
-      <!-- ── COLUMN 1: Frontend ── -->
+      <!-- ── COLUMN 1: Frontend Tier ── -->
       <div class="card">
         <div class="card-title">
           <span class="icon">⚛️</span>
           <div>
-            <div>Frontend</div>
-            <div class="card-sub" style="font-size:11.5px; margin-top:2px;">React 18 + Vite &nbsp;·&nbsp; Hosted on Vercel</div>
+            <div>Frontend Client</div>
+            <div class="card-sub" style="font-size:11.5px; margin-top:2px;">React 18 + Vite &nbsp;·&nbsp; Edge Deployed on Vercel</div>
           </div>
         </div>
 
-        <div class="section-label">Pages</div>
+        <div class="section-label">Core View Pages</div>
         <div class="stack" style="margin-bottom: 18px;">
           <div class="node" onclick="openDrawer('editor-page')">
             <span class="node-icon">💻</span>
             <div>
-              <div class="node-name">Editor (/editor/:roomId)</div>
-              <div class="node-desc">Monaco editor · split resizer · real-time cursors · output/input tabs</div>
+              <div class="node-name">Editor Workspace (/editor/:roomId)</div>
+              <div class="node-desc">Monaco core · draggable split resizer · real-time cursor sync · dual output/input tabs</div>
             </div>
           </div>
           <div class="node" onclick="openDrawer('dashboard-page')">
             <span class="node-icon">📊</span>
             <div>
-              <div class="node-name">Dashboard (/dashboard)</div>
-              <div class="node-desc">Create 6-char room · join by code · profile &amp; security</div>
+              <div class="node-name">Lobby Dashboard (/dashboard)</div>
+              <div class="node-desc">Instant 6-char room generator · join by room code · user credentials sync</div>
             </div>
           </div>
           <div class="node" onclick="openDrawer('home-page')">
             <span class="node-icon">🏠</span>
             <div>
-              <div class="node-name">Home (/)</div>
-              <div class="node-desc">Interactive live Monaco playground · feature bento grid</div>
+              <div class="node-name">Showcase Home (/)</div>
+              <div class="node-desc">Live interactive Monaco playground · feature architecture showcase</div>
             </div>
           </div>
           <div class="node" onclick="openDrawer('auth-pages')">
             <span class="node-icon">🔐</span>
             <div>
-              <div class="node-name">Login / Signup / OAuth</div>
-              <div class="node-desc">Email/Password + Google OAuth 2.0 callback handler</div>
-              <div class="node-sub">Public-only routes with JWT storage</div>
+              <div class="node-name">Auth Gateway (/login · /signup · /oauth-success)</div>
+              <div class="node-desc">Bcrypt credentials + Google OAuth 2.0 handshake pickup</div>
             </div>
           </div>
         </div>
 
-        <div class="section-label">Core Components</div>
+        <div class="section-label">Custom Modular UI</div>
         <div class="wrap" style="margin-bottom: 18px;">
           <span class="tag tag-blue" onclick="openDrawer('monaco-comp')" style="cursor:pointer;">CodeEditor (Monaco)</span>
           <span class="tag tag-blue" onclick="openDrawer('output-comp')" style="cursor:pointer;">Output + Stdin Tabs</span>
-          <span class="tag tag-blue" onclick="openDrawer('header-comp')" style="cursor:pointer;">Header + Runs Counter</span>
-          <span class="tag tag-blue" onclick="openDrawer('chat-comp')" style="cursor:pointer;">Chat Drawer</span>
-          <span class="tag tag-blue" onclick="openDrawer('participants-comp')" style="cursor:pointer;">Participants Drawer</span>
-          <span class="tag tag-slate">EditorResizer</span>
+          <span class="tag tag-blue" onclick="openDrawer('header-comp')" style="cursor:pointer;">Header + 50 Runs Counter</span>
+          <span class="tag tag-purple" onclick="openDrawer('chat-comp')" style="cursor:pointer;">Chat Drawer</span>
+          <span class="tag tag-green" onclick="openDrawer('participants-comp')" style="cursor:pointer;">Participants Drawer</span>
+          <span class="tag tag-slate">DraggableResizer</span>
         </div>
 
-        <div class="section-label">Global State &amp; Sockets</div>
+        <div class="section-label">State Management &amp; Transport</div>
         <div class="stack">
-          <div class="node" onclick="openDrawer('auth-ctx')" style="border-color: #bfdbfe; background: #eff6ff;">
+          <div class="node" onclick="openDrawer('auth-ctx')">
             <span class="node-icon">🧠</span>
             <div>
               <div class="node-name">AuthContext</div>
-              <div class="node-desc">user · token · login · signup · googleLogin</div>
-              <div class="node-sub">Syncs to localStorage &amp; session token</div>
+              <div class="node-desc">user · token · isAuthenticated · localStorage persistence</div>
             </div>
           </div>
-          <div class="node" onclick="openDrawer('socket-client')" style="border-color: #ddd6fe; background: #faf5ff;">
+          <div class="node" onclick="openDrawer('socket-client')">
             <span class="node-icon">⚡</span>
             <div>
-              <div class="node-name">Socket.IO Singleton</div>
-              <div class="node-desc">autoConnect: false · JWT handshake auth</div>
-              <div class="node-sub">code-change · cursor_move · presence · usage</div>
+              <div class="node-name">Socket.IO Client Singleton</div>
+              <div class="node-desc">Handshake token auth · buffer sync · live presence · global counter</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── COLUMN 2: Backend ── -->
+      <!-- ── COLUMN 2: Backend Tier ── -->
       <div class="card">
         <div class="card-title">
           <span class="icon">🟢</span>
           <div>
-            <div>Backend</div>
-            <div class="card-sub" style="font-size:11.5px; margin-top:2px;">Node.js + Express + Socket.IO &nbsp;·&nbsp; Render / VPS</div>
+            <div>Application Server</div>
+            <div class="card-sub" style="font-size:11.5px; margin-top:2px;">Node.js + Express + Socket.IO &nbsp;·&nbsp; Render / Railway</div>
           </div>
         </div>
 
-        <div class="section-label">Route Controllers</div>
+        <div class="section-label">API Endpoints</div>
         <div class="stack" style="margin-bottom: 18px;">
           <div class="node" onclick="openDrawer('auth-ctrl')">
             <div style="flex-shrink:0; margin-top:1px;">
@@ -361,7 +491,7 @@
             </div>
             <div>
               <div class="node-name">/api/rooms &nbsp;<span class="tag tag-red">🔒 JWT</span></div>
-              <div class="node-desc">create (6-char ID) · join · leave · role update · transfer owner · kick</div>
+              <div class="node-desc">create (6-char ID) · join · leave · RBAC role update · ownership handover</div>
             </div>
           </div>
           <div class="node" onclick="openDrawer('execute-ctrl')">
@@ -370,46 +500,46 @@
             </div>
             <div>
               <div class="node-name">/api/execute &nbsp;<span class="tag tag-red">🔒 JWT</span></div>
-              <div class="node-desc">executeCode (with stdin) · getExecutionUsage (daily runs)</div>
+              <div class="node-desc">executeCode (with stdin) · getExecutionUsage (daily quota)</div>
             </div>
           </div>
         </div>
 
-        <div class="section-label">Services &amp; Real-time Engine</div>
+        <div class="section-label">Services &amp; Real-time Protocol</div>
         <div class="stack" style="margin-bottom: 18px;">
-          <div class="node" onclick="openDrawer('socket-handler')" style="border-color: #c4b5fd; background: #faf5ff;">
+          <div class="node" onclick="openDrawer('socket-handler')">
             <span class="node-icon">🔌</span>
             <div>
               <div class="node-name">socketHandler + presenceStore</div>
-              <div class="node-desc">Rooms broadcast · cursor sync (100ms throttle) · 5s disconnect grace</div>
+              <div class="node-desc">Room broadcast · cursor throttle (100ms) · 5s reload grace period</div>
             </div>
           </div>
-          <div class="node" onclick="openDrawer('exec-svc')" style="border-color: #6ee7b7; background: #f0fdf4;">
+          <div class="node" onclick="openDrawer('exec-svc')">
             <span class="node-icon">⚡</span>
             <div>
               <div class="node-name">executionService</div>
-              <div class="node-desc">Pluggable provider: Judge0 API vs Docker runner · error formatting</div>
+              <div class="node-desc">Pluggable Provider Strategy: Judge0 Cloud API vs Local Docker runner</div>
             </div>
           </div>
-          <div class="node" onclick="openDrawer('usage-svc')" style="border-color: #fed7aa; background: #fff7ed;">
+          <div class="node" onclick="openDrawer('usage-svc')">
             <span class="node-icon">📈</span>
             <div>
               <div class="node-name">usageService</div>
-              <div class="node-desc">Global platform limit (50 runs/day) · atomic MongoDB upsert ($inc)</div>
+              <div class="node-desc">Platform-wide daily limit (50 runs/day) · atomic MongoDB upsert</div>
             </div>
           </div>
-          <div class="node" onclick="openDrawer('room-svc')" style="border-color: #bfdbfe; background: #eff6ff;">
+          <div class="node" onclick="openDrawer('room-svc')">
             <span class="node-icon">🚪</span>
             <div>
               <div class="node-name">roomService &amp; chatService</div>
-              <div class="node-desc">Room lifecycle · RBAC permissions · pickNextOwner on disconnect</div>
+              <div class="node-desc">Room lifecycle · RBAC permissions · pickNextOwner on departure</div>
             </div>
           </div>
         </div>
 
-        <div class="section-label">Middleware</div>
+        <div class="section-label">Security &amp; Rate Limiting</div>
         <div class="wrap">
-          <span class="tag tag-red" onclick="openDrawer('auth-mw')" style="cursor:pointer;">verifyAuthToken</span>
+          <span class="tag tag-red" onclick="openDrawer('auth-mw')" style="cursor:pointer;">verifyAuthToken (JWT)</span>
           <span class="tag tag-slate" onclick="openDrawer('rate-limiter')" style="cursor:pointer;">executionLimiter (5/min)</span>
           <span class="tag tag-slate">Passport Google Strategy</span>
         </div>
@@ -428,7 +558,7 @@
             </div>
           </div>
           <div class="stack">
-            <div class="node" onclick="openDrawer('judge0-engine')" style="border-color: #6ee7b7; background: #f0fdf4;">
+            <div class="node" onclick="openDrawer('judge0-engine')">
               <span class="node-icon">⚖️</span>
               <div>
                 <div class="node-name">Judge0 Cloud / Self-Hosted</div>
@@ -436,7 +566,7 @@
                 <div class="node-sub">Supports: Python, JS, C++, Java, Go, Rust</div>
               </div>
             </div>
-            <div class="node" onclick="openDrawer('docker-engine')" style="border-color: #bfdbfe; background: #eff6ff;">
+            <div class="node" onclick="openDrawer('docker-engine')">
               <span class="node-icon">🐳</span>
               <div>
                 <div class="node-name">Docker Sandbox (Optional)</div>
@@ -474,23 +604,23 @@
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
             <div class="node" onclick="openDrawer('schema-users')" style="padding:10px; text-align:center; display:block;">
               <div style="font-size:16px; margin-bottom:4px;">👥</div>
-              <div style="font-size:12px; font-weight:700; color:#0f172a;">users</div>
-              <div style="font-size:11px; color:#64748b; margin-top:2px;">auth · bcrypt · googleId</div>
+              <div style="font-size:12px; font-weight:700; color:var(--text-main);">users</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">auth · bcrypt · googleId</div>
             </div>
             <div class="node" onclick="openDrawer('schema-rooms')" style="padding:10px; text-align:center; display:block;">
               <div style="font-size:16px; margin-bottom:4px;">📁</div>
-              <div style="font-size:12px; font-weight:700; color:#0f172a;">rooms</div>
-              <div style="font-size:11px; color:#64748b; margin-top:2px;">6-char code · code · members</div>
+              <div style="font-size:12px; font-weight:700; color:var(--text-main);">rooms</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">6-char code · code · members</div>
             </div>
             <div class="node" onclick="openDrawer('schema-chat')" style="padding:10px; text-align:center; display:block;">
               <div style="font-size:16px; margin-bottom:4px;">💬</div>
-              <div style="font-size:12px; font-weight:700; color:#0f172a;">chatmessages</div>
-              <div style="font-size:11px; color:#64748b; margin-top:2px;">in-room history · timestamps</div>
+              <div style="font-size:12px; font-weight:700; color:var(--text-main);">chatmessages</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">in-room history · timestamps</div>
             </div>
-            <div class="node" onclick="openDrawer('schema-usage')" style="padding:10px; text-align:center; display:block; border-color:#fed7aa; background:#fff7ed;">
+            <div class="node" onclick="openDrawer('schema-usage')" style="padding:10px; text-align:center; display:block; border-color: rgba(249, 115, 22, 0.3);">
               <div style="font-size:16px; margin-bottom:4px;">⚡</div>
-              <div style="font-size:12px; font-weight:700; color:#0f172a;">dailyexecutions</div>
-              <div style="font-size:11px; color:#64748b; margin-top:2px;">global daily counter (50 max)</div>
+              <div style="font-size:12px; font-weight:700; color:var(--text-main);">dailyexecutions</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">global daily counter (50 max)</div>
             </div>
           </div>
         </div>
@@ -500,7 +630,7 @@
 
     <!-- ── Request Flow Timeline ── -->
     <div class="card">
-      <div class="card-title"><span class="icon">🔄</span> Code Execution &amp; Real-Time Broadcast Flow</div>
+      <div class="card-title"><span class="icon">🔄</span> Code Execution &amp; Real-Time Broadcast Pipeline</div>
       <div class="flow-row">
 
         <div class="flow-step">
@@ -514,13 +644,13 @@
 
         <div class="flow-connector">
           <div class="flow-arrow-label">POST /execute</div>
-          <div class="flow-arrow-line" style="border-color:#2563eb; border-top-style:solid;"></div>
+          <div class="flow-arrow-line" style="border-color:#38bdf8; border-top-style:solid;"></div>
         </div>
 
         <div class="flow-step">
           <div class="flow-num">2</div>
           <div class="flow-vline"></div>
-          <div class="flow-box" style="border-color:#fed7aa; background:#fff7ed;">
+          <div class="flow-box">
             <div class="flow-box-title">Limit &amp; Auth Check</div>
             <div class="flow-box-sub">JWT verified · usage.remaining &gt; 0 check</div>
           </div>
@@ -534,7 +664,7 @@
         <div class="flow-step">
           <div class="flow-num">3</div>
           <div class="flow-vline"></div>
-          <div class="flow-box" style="border-color:#bbf7d0; background:#f0fdf4;">
+          <div class="flow-box">
             <div class="flow-box-title">Judge0 Sandbox</div>
             <div class="flow-box-sub">source_code + stdin &lt; wait=true &gt;</div>
           </div>
@@ -542,13 +672,13 @@
 
         <div class="flow-connector">
           <div class="flow-arrow-label">atomic $inc</div>
-          <div class="flow-arrow-line" style="border-color:#fed7aa;"></div>
+          <div class="flow-arrow-line"></div>
         </div>
 
         <div class="flow-step">
           <div class="flow-num">4</div>
           <div class="flow-vline"></div>
-          <div class="flow-box" style="border-color:#ddd6fe; background:#faf5ff;">
+          <div class="flow-box">
             <div class="flow-box-title">MongoDB Update</div>
             <div class="flow-box-sub">incrementDailyUsage() in DailyExecution</div>
           </div>
@@ -556,13 +686,13 @@
 
         <div class="flow-connector">
           <div class="flow-arrow-label">io.emit() ∥</div>
-          <div class="flow-arrow-line" style="border-color:#c4b5fd;"></div>
+          <div class="flow-arrow-line"></div>
         </div>
 
         <div class="flow-step">
           <div class="flow-num">5</div>
           <div class="flow-vline"></div>
-          <div class="flow-box" style="border-color:#bfdbfe; background:#eff6ff;">
+          <div class="flow-box">
             <div class="flow-box-title">Global Broadcast</div>
             <div class="flow-box-sub">execution-usage to ALL rooms &amp; users</div>
           </div>
@@ -600,10 +730,10 @@
             <tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Body / Params</th></tr>
           </thead>
           <tbody>
-            <tr><td><span class="badge-post">POST</span></td><td class="mono">/signup</td><td style="color:#94a3b8; font-size:12px;">None</td><td>Register account with email &amp; bcrypt password</td><td class="mono">name, email, password</td></tr>
-            <tr><td><span class="badge-post">POST</span></td><td class="mono">/login</td><td style="color:#94a3b8; font-size:12px;">None</td><td>Email/password login → returns JWT + User object</td><td class="mono">email, password</td></tr>
-            <tr><td><span class="badge-get">GET</span></td><td class="mono">/google</td><td style="color:#94a3b8; font-size:12px;">None</td><td>Redirects to Google OAuth 2.0 consent screen</td><td class="mono">—</td></tr>
-            <tr><td><span class="badge-get">GET</span></td><td class="mono">/google/callback</td><td style="color:#94a3b8; font-size:12px;">None</td><td>Google OAuth callback → signs JWT → redirects to /oauth-success</td><td class="mono">?code=&amp;scope=</td></tr>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/signup</td><td style="color:var(--text-subtle); font-size:12px;">None</td><td>Register account with email &amp; bcrypt password</td><td class="mono">name, email, password</td></tr>
+            <tr><td><span class="badge-post">POST</span></td><td class="mono">/login</td><td style="color:var(--text-subtle); font-size:12px;">None</td><td>Email/password login → returns JWT + User object</td><td class="mono">email, password</td></tr>
+            <tr><td><span class="badge-get">GET</span></td><td class="mono">/google</td><td style="color:var(--text-subtle); font-size:12px;">None</td><td>Redirects to Google OAuth 2.0 consent screen</td><td class="mono">—</td></tr>
+            <tr><td><span class="badge-get">GET</span></td><td class="mono">/google/callback</td><td style="color:var(--text-subtle); font-size:12px;">None</td><td>Google OAuth callback → signs JWT → redirects to /oauth-success</td><td class="mono">?code=&amp;scope=</td></tr>
             <tr><td><span class="badge-get">GET</span></td><td class="mono">/me</td><td><span class="tag tag-red">🔒 JWT</span></td><td>Fetch current authenticated user profile</td><td class="mono">—</td></tr>
             <tr><td><span class="badge-patch">PATCH</span></td><td class="mono">/profile</td><td><span class="tag tag-red">🔒 JWT</span></td><td>Update user display name</td><td class="mono">displayName</td></tr>
             <tr><td><span class="badge-put">PUT</span></td><td class="mono">/password</td><td><span class="tag tag-red">🔒 JWT</span></td><td>Update account password (verifies current password)</td><td class="mono">currentPassword, newPassword</td></tr>
@@ -680,7 +810,7 @@
       <div class="card">
         <div class="card-title"><span class="icon">✏️</span> Real-Time Collaborative Editing Flow</div>
         <div class="stack">
-          <div class="flow-step-card" style="border-color:#bfdbfe; background:#eff6ff;">
+          <div class="flow-step-card">
             <div class="step-num" style="background:#2563eb;">1</div>
             <div>
               <div class="step-title">Monaco onChange Event</div>
@@ -694,14 +824,14 @@
               <div class="step-desc">Client transmits { roomId, code, language } to backend socket server with user identity.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#ddd6fe; background:#faf5ff;">
+          <div class="flow-step-card">
             <div class="step-num" style="background:#7c3aed;">3</div>
             <div>
               <div class="step-title">Backend Validation &amp; Persistence</div>
               <div class="step-desc">Backend verifies caller has 'owner' or 'editor' role → updates Room document in MongoDB asynchronously.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#bbf7d0; background:#f0fdf4;">
+          <div class="flow-step-card">
             <div class="step-num success" style="background:#10b981;">4</div>
             <div>
               <div class="step-title">Broadcast code-update</div>
@@ -722,21 +852,21 @@
               <div class="step-desc">User provides input in 'Input (stdin)' tab → clicks Run → switches tab to 'Output' and calls POST /api/execute.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#fed7aa; background:#fff7ed;">
+          <div class="flow-step-card">
             <div class="step-num" style="background:#f59e0b;">2</div>
             <div>
               <div class="step-title">Rate Limit &amp; Daily Quota Check</div>
               <div class="step-desc">Express checks 5 req/min rateLimiter + checks MongoDB DailyExecution. If remaining &lt;= 0, returns 429 quota error.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#bbf7d0; background:#f0fdf4;">
+          <div class="flow-step-card">
             <div class="step-num" style="background:#10b981;">3</div>
             <div>
               <div class="step-title">Judge0 Base64 Execution</div>
               <div class="step-desc">Encodes source_code and stdin into Base64 → POST /submissions?base64_encoded=true&amp;wait=true → decodes stdout/stderr/compilation errors.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#ddd6fe; background:#faf5ff;">
+          <div class="flow-step-card">
             <div class="step-num success" style="background:#7c3aed;">4</div>
             <div>
               <div class="step-title">Atomic Usage Increment &amp; Global Broadcast</div>
@@ -757,14 +887,14 @@
               <div class="step-desc">Detects cursor caret / line / column movements inside Monaco editor.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#fde68a; background:#fffbeb;">
+          <div class="flow-step-card">
             <div class="step-num" style="background:#d97706;">2</div>
             <div>
               <div class="step-title">Client-side Throttle (100ms)</div>
               <div class="step-desc">Prevents socket flooding by throttling cursor emissions to maximum 1 update per 100ms.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#bbf7d0; background:#f0fdf4;">
+          <div class="flow-step-card">
             <div class="step-num success" style="background:#10b981;">3</div>
             <div>
               <div class="step-title">Monaco Delta Decorations</div>
@@ -785,14 +915,14 @@
               <div class="step-desc">User clicks Exit button or hits browser Back (popstate) → window.confirm() dialog prevents accidental loss.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#fed7aa; background:#fff7ed;">
+          <div class="flow-step-card">
             <div class="step-num" style="background:#f59e0b;">2</div>
             <div>
               <div class="step-title">5-Second Disconnect Grace Period</div>
               <div class="step-desc">On socket disconnect, presenceStore waits 5000ms. If user reloads or reconnects within 5s, room state is preserved.</div>
             </div>
           </div>
-          <div class="flow-step-card" style="border-color:#ddd6fe; background:#faf5ff;">
+          <div class="flow-step-card">
             <div class="step-num success" style="background:#7c3aed;">3</div>
             <div>
               <div class="step-title">Automated Next-Owner Election</div>
@@ -909,11 +1039,11 @@
             </tbody>
           </table>
         </div>
-        <div style="margin: 14px 18px 18px; padding: 14px 16px; background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 10px;">
-          <div style="font-size: 12px; font-weight: 800; color: #9a3412; margin-bottom: 8px;">⚡ Platform-Wide Quota Architecture</div>
-          <div style="font-size: 12px; color: #7c2d12; display: flex; flex-direction: column; gap: 5px;">
-            <div><span style="font-weight:700;">Atomic Operations:</span> Uses findOneAndUpdate({ date }, { $inc: { count: 1 } }, { upsert: true }) to prevent race conditions during concurrent runs.</div>
-            <div><span style="font-weight:700;">Global Synchronization:</span> Backend uses io.emit("execution-usage") to update all connected sockets across all rooms simultaneously in real-time.</div>
+        <div style="margin: 14px 18px 18px; padding: 14px 16px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(249, 115, 22, 0.25); border-radius: 10px;">
+          <div style="font-size: 12px; font-weight: 800; color: #fb923c; margin-bottom: 8px;">⚡ Platform-Wide Quota Architecture</div>
+          <div style="font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 5px;">
+            <div><span style="font-weight:700; color:var(--text-main);">Atomic Operations:</span> Uses findOneAndUpdate({ date }, { $inc: { count: 1 } }, { upsert: true }) to prevent race conditions during concurrent runs.</div>
+            <div><span style="font-weight:700; color:var(--text-main);">Global Synchronization:</span> Backend uses io.emit("execution-usage") to update all connected sockets across all rooms simultaneously in real-time.</div>
           </div>
         </div>
       </div>
@@ -938,6 +1068,25 @@
 </div>
 
 <script>
+  /* ── Theme Switching ───────────────────────────────── */
+  function toggleTheme() {
+    const root = document.documentElement;
+    const currentTheme = root.getAttribute('data-theme') || 'dark';
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', nextTheme);
+    document.getElementById('themeToggle').textContent = nextTheme === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('collabx_arch_theme', nextTheme); } catch(e){}
+  }
+
+  // Restore saved theme on load
+  try {
+    const savedTheme = localStorage.getItem('collabx_arch_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
+  } catch(e){}
+
   /* ── Tab switching ─────────────────────────────────── */
   const TABS = ['overview','api','dataflow','db'];
   function showTab(name) {
