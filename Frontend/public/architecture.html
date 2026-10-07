@@ -406,7 +406,7 @@
             <span class="node-icon">💻</span>
             <div>
               <div class="node-name">Editor Workspace (/editor/:roomId)</div>
-              <div class="node-desc">Monaco core · draggable split resizer · real-time cursor sync · dual output/input tabs</div>
+              <div class="node-desc">Monaco core · draggable split resizer · real-time code buffer sync · dual output/input tabs</div>
             </div>
           </div>
           <div class="node" onclick="openDrawer('dashboard-page')">
@@ -511,7 +511,7 @@
             <span class="node-icon">🔌</span>
             <div>
               <div class="node-name">socketHandler + presenceStore</div>
-              <div class="node-desc">Room broadcast · cursor throttle (100ms) · 5s reload grace period</div>
+              <div class="node-desc">Room broadcast · full document sync · 5s reload grace period</div>
             </div>
           </div>
           <div class="node" onclick="openDrawer('exec-svc')">
@@ -784,12 +784,10 @@
           <tbody>
             <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">join-room / rejoin-room</td><td class="mono">{ roomId }</td><td>Authenticates socket and joins Socket.IO room; clears disconnect timers</td></tr>
             <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">code-change</td><td class="mono">{ roomId, code, language }</td><td>Emits live buffer change (debounced 120ms); saves to MongoDB</td></tr>
-            <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">cursor_move</td><td class="mono">{ roomId, position }</td><td>Emits cursor line/column coordinates (throttled 100ms)</td></tr>
             <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">send-message</td><td class="mono">{ roomId, message }</td><td>Broadcasts chat message; persists in chatmessages collection</td></tr>
             <tr><td><span class="badge-ws">Client ➔ Server</span></td><td class="mono">leave-room</td><td class="mono">{ roomId }</td><td>Gracefully departs room and updates presence</td></tr>
             <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">room-state</td><td class="mono">{ room, messages, rejoined }</td><td>Initial full snapshot upon entering room</td></tr>
             <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">code-update</td><td class="mono">{ code, language, updatedBy }</td><td>Broadcasted to peers; sets remote Monaco content</td></tr>
-            <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">cursor_update</td><td class="mono">{ userId, displayName, color, position }</td><td>Renders remote multi-cursor flags in Monaco</td></tr>
             <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">presence-updated</td><td class="mono">activeUsers[]</td><td>Renders online/offline indicators and member count</td></tr>
             <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">execution-usage</td><td class="mono">{ date, used, limit, remaining }</td><td><strong>Global broadcast to all users in all rooms</strong> for daily counter</td></tr>
             <tr><td><span class="badge-get">Server ➔ Client</span></td><td class="mono">execution-result</td><td class="mono">{ output, language, roomId }</td><td>Renders execution output in Output terminal tab</td></tr>
@@ -835,7 +833,7 @@
             <div class="step-num success" style="background:#10b981;">4</div>
             <div>
               <div class="step-title">Broadcast code-update</div>
-              <div class="step-desc">io.to(roomId).except(senderSocketId).emit("code-update") → remote peers update buffer without losing cursor position.</div>
+              <div class="step-desc">io.to(roomId).except(senderSocketId).emit("code-update") → remote peers update Monaco editor buffer seamlessly.</div>
             </div>
           </div>
         </div>
@@ -876,29 +874,29 @@
         </div>
       </div>
 
-      <!-- Remote Cursor Tracking Flow -->
+      <!-- Real-Time In-Room Team Chat Flow -->
       <div class="card">
-        <div class="card-title"><span class="icon">🖱️</span> Real-Time Multi-Cursor Synchronization</div>
+        <div class="card-title"><span class="icon">💬</span> Real-Time In-Room Team Chat Pipeline</div>
         <div class="stack">
           <div class="flow-step-card">
             <div class="step-num" style="background:#2563eb;">1</div>
             <div>
-              <div class="step-title">Monaco onDidChangeCursorPosition</div>
-              <div class="step-desc">Detects cursor caret / line / column movements inside Monaco editor.</div>
+              <div class="step-title">Client Message Input</div>
+              <div class="step-desc">User sends a message from the collapsible Chat drawer → client trims text and checks connection.</div>
             </div>
           </div>
           <div class="flow-step-card">
             <div class="step-num" style="background:#d97706;">2</div>
             <div>
-              <div class="step-title">Client-side Throttle (100ms)</div>
-              <div class="step-desc">Prevents socket flooding by throttling cursor emissions to maximum 1 update per 100ms.</div>
+              <div class="step-title">Socket Event &amp; Database Persistence</div>
+              <div class="step-desc">socket.emit("send-message") → server validates sender presence → saves to MongoDB ChatMessage collection.</div>
             </div>
           </div>
           <div class="flow-step-card">
             <div class="step-num success" style="background:#10b981;">3</div>
             <div>
-              <div class="step-title">Monaco Delta Decorations</div>
-              <div class="step-desc">Remote clients receive cursor_update → renders custom CSS flag badge with peer's name &amp; color-coded cursor bar.</div>
+              <div class="step-title">Broadcast receive-message</div>
+              <div class="step-desc">io.to(roomId).emit("receive-message") → delivers message payload to all active room peers with avatars &amp; timestamps.</div>
             </div>
           </div>
         </div>
@@ -1106,7 +1104,7 @@
       path: 'Frontend/src/pages/Editor.jsx',
       items: [
         'Main workspace integrating Microsoft Monaco Editor with side-by-side output/input panel',
-        'Multi-cursor remote rendering: listens for cursor_update and decorates Monaco carets with peer names & avatars',
+        'Real-time collaborative code buffer sync via debounced code-change socket broadcasts',
         'Exit confirmation guard: popstate (browser back) and beforeunload interceptors prevent accidental room departure',
         'Dynamic silent code download mapping current language to file extension (main.py, main.js, main.cpp, etc.)',
         'Real-time socket subscriptions for code-update, execution-result, presence-updated, and execution-usage',
@@ -1127,7 +1125,7 @@
       path: 'Frontend/src/pages/Home.jsx',
       items: [
         'Interactive landing page with live Monaco code editor playground',
-        'Feature showcase bento grid: multi-cursor collaboration, Docker sandboxing, role permissions, in-room chat',
+        'Feature showcase bento grid: real-time code synchronization, Docker sandboxing, role permissions, in-room chat',
         'Public exploration route encouraging room creation and live collaboration',
       ]
     },
@@ -1146,8 +1144,8 @@
       items: [
         'Wraps @monaco-editor/react with custom dark theme (#1A2232 background matching CollabX palette)',
         'Supports 6 language syntax highlighters: Python, JavaScript, C++, Java, Go, Rust',
-        'Renders remote peer cursors using Monaco DeltaDecorations API with custom CSS badges',
-        'Emits local cursor movements (throttled at 100ms) and text changes (debounced at 120ms)',
+        'Interactive code editing with automatic layout, font ligatures, line wrapping, and syntax coloring',
+        'Emits text changes debounced at 120ms to prevent network congestion',
       ]
     },
     'output-comp': {

@@ -40,7 +40,6 @@ const Editor = () => {
   const [error, setError] = useState("");
   const [actionUserId, setActionUserId] = useState(null);
   const [presenceToasts, setPresenceToasts] = useState([]);
-  const [remoteCursors, setRemoteCursors] = useState({});
   const [usage, setUsage] = useState({ used: 0, limit: 50, remaining: 50 });
 
   const hasJoinedRef = useRef(false);
@@ -59,13 +58,6 @@ const Editor = () => {
   );
   const canEdit = ["owner", "editor"].includes(currentMember?.role || "");
   const isOwner = currentMember?.role === "owner";
-  const activeCursors = useMemo(
-    () =>
-      Object.values(remoteCursors).filter(
-        (cursor) => cursor.userId !== currentUserId
-      ),
-    [currentUserId, remoteCursors]
-  );
 
   const [splitRatio, setSplitRatio] = useState(() => {
     try {
@@ -320,14 +312,6 @@ const Editor = () => {
           activeUsers,
         };
       });
-
-      setRemoteCursors((currentCursors) =>
-        Object.fromEntries(
-          Object.entries(currentCursors).filter(([userId]) =>
-            activeUsers.some((activeUser) => activeUser.userId === userId)
-          )
-        )
-      );
     };
 
     const handleCodeUpdate = ({ code: nextCode, language: nextLanguage, updatedBy }) => {
@@ -357,21 +341,6 @@ const Editor = () => {
       if (nextUsage && typeof nextUsage.used === "number") {
         setUsage(nextUsage);
       }
-    };
-
-    const handleCursorUpdate = (cursor) => {
-      setRemoteCursors((currentCursors) => ({
-        ...currentCursors,
-        [cursor.userId]: cursor,
-      }));
-    };
-
-    const handleCursorRemove = ({ userId }) => {
-      setRemoteCursors((currentCursors) => {
-        const nextCursors = { ...currentCursors };
-        delete nextCursors[userId];
-        return nextCursors;
-      });
     };
 
     const handleRemovedFromRoom = () => {
@@ -406,8 +375,6 @@ const Editor = () => {
     socket.on("receive-message", handleReceiveMessage);
     socket.on("execution-result", handleExecutionResult);
     socket.on("execution-usage", handleExecutionUsage);
-    socket.on("cursor_update", handleCursorUpdate);
-    socket.on("cursor-remove", handleCursorRemove);
     socket.on("removed-from-room", handleRemovedFromRoom);
     socket.on("room-closed", handleRoomClosed);
     socket.on("room-error", handleRoomError);
@@ -441,8 +408,6 @@ const Editor = () => {
       socket.off("receive-message", handleReceiveMessage);
       socket.off("execution-result", handleExecutionResult);
       socket.off("execution-usage", handleExecutionUsage);
-      socket.off("cursor_update", handleCursorUpdate);
-      socket.off("cursor-remove", handleCursorRemove);
       socket.off("removed-from-room", handleRemovedFromRoom);
       socket.off("room-closed", handleRoomClosed);
       socket.off("room-error", handleRoomError);
@@ -584,17 +549,6 @@ const Editor = () => {
       message: chatInput,
     });
     setChatInput("");
-  };
-
-  const handleCursorMove = (position) => {
-    if (!canEdit || !socket.connected) {
-      return;
-    }
-
-    socket.emit("cursor_move", {
-      roomId,
-      position,
-    });
   };
 
   const handleRoleChange = async (memberId, nextRole) => {
@@ -750,9 +704,7 @@ const Editor = () => {
             code={code}
             language={language}
             onChange={handleEditorChange}
-            onCursorMove={handleCursorMove}
             readOnly={!canEdit}
-            remoteCursors={activeCursors}
           />
         </section>
 

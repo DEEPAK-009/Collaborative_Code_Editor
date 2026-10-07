@@ -4,7 +4,6 @@ const usageService = require("../services/usageService");
 const presenceStore = require("./presenceStore");
 
 const DISCONNECT_GRACE_MS = 5000;
-const CURSOR_THROTTLE_MS = 100;
 
 const emitRoomSnapshot = async (io, roomId) => {
   const room = await roomService.getRoom(roomId);
@@ -52,8 +51,6 @@ const finalizeDeparture = async (io, roomId, userId) => {
 
 const socketHandler = (io) => {
   io.on("connection", (socket) => {
-    const lastCursorUpdate = {};
-
     // Send the latest global daily execution usage to the newly connected user
     usageService
       .getDailyUsage()
@@ -169,8 +166,6 @@ const socketHandler = (io) => {
         return;
       }
 
-      io.to(roomId).emit("cursor-remove", { userId });
-
       if (!removal.hasRemainingUserSockets) {
         await finalizeDeparture(io, roomId, userId);
       } else {
@@ -179,15 +174,12 @@ const socketHandler = (io) => {
     });
 
     socket.on("disconnect", async () => {
-      delete lastCursorUpdate[socket.id];
-
       const removal = presenceStore.removeSocket(socket.id);
 
       if (!removal) {
         return;
       }
 
-      io.to(removal.roomId).emit("cursor-remove", { userId: removal.userId });
       await emitRoomSnapshot(io, removal.roomId);
 
       if (!removal.hasRemainingUserSockets) {
@@ -200,39 +192,6 @@ const socketHandler = (io) => {
           DISCONNECT_GRACE_MS
         );
       }
-    });
-
-    socket.on("cursor_move", ({ roomId, position }) => {
-      const userId = socket.user.id;
-      const now = Date.now();
-      const activeUser = presenceStore.getActiveUser(roomId, userId);
-
-      if (!activeUser || !["owner", "editor"].includes(activeUser.role)) {
-        return;
-      }
-
-      if (
-        lastCursorUpdate[socket.id] &&
-        now - lastCursorUpdate[socket.id] < CURSOR_THROTTLE_MS
-      ) {
-        return;
-      }
-
-      lastCursorUpdate[socket.id] = now;
-
-      if (
-        !position ||
-        typeof position.lineNumber !== "number" ||
-        typeof position.column !== "number"
-      ) {
-        return;
-      }
-
-      socket.to(roomId).emit("cursor_update", {
-        userId,
-        displayName: activeUser.displayName,
-        position,
-      });
     });
   });
 };

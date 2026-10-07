@@ -98,7 +98,7 @@ const Home = () => {
 
           <p className="hero-description">
             CollabX gives developers, engineering teams, interviewers, and study groups a unified collaborative workspace.
-            Experience sub-millisecond multi-cursor editing, sandboxed Docker compilation for 6+ languages, in-room team chat, and role-based permissions.
+            Experience sub-millisecond code synchronization, sandboxed Docker compilation for 6+ languages, in-room team chat, and role-based permissions.
           </p>
 
           {/* Quick Metrics Bar */}
@@ -132,7 +132,7 @@ const Home = () => {
           <span className="section-badge">Everything You Need</span>
           <h2 className="section-title">Built for Serious Collaborative Engineering</h2>
           <p className="section-subtitle">
-            From lightning-fast cursor synchronization to safe containerized code execution, CollabX brings the entire developer cycle into a single browser tab.
+            From lightning-fast code synchronization to safe containerized code execution, CollabX brings the entire developer cycle into a single browser tab.
           </p>
         </div>
 
@@ -337,7 +337,7 @@ const Home = () => {
             <div className="step-number">03</div>
             <h3>Pair Program, Chat & Execute</h3>
             <p>
-              Type together with live multi-cursor tracking, discuss in room chat, and run your code with instant terminal output.
+              Type together with real-time code synchronization, discuss in room chat, and run your code with instant terminal output.
             </p>
           </div>
         </div>
@@ -412,7 +412,7 @@ const Home = () => {
               <Logo size={36} />
             </Link>
             <p className="footer-bio">
-              High-performance collaborative coding environment with live multi-cursor synchronization, Docker runtime isolation, and room governance.
+              High-performance collaborative coding environment with real-time code synchronization, Docker runtime isolation, and room governance.
             </p>
           </div>
 

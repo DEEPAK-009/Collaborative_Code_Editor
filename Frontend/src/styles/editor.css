@@ -1612,26 +1612,6 @@
   font-size: 0.85rem;
 }
 
-/* --------------------------------------------------------------------------
-   Monaco Remote Cursors
-   -------------------------------------------------------------------------- */
-.remote-cursor-0,
-.remote-cursor-1,
-.remote-cursor-2,
-.remote-cursor-3,
-.remote-cursor-4,
-.remote-cursor-5 {
-  border-left-width: 2px;
-  border-left-style: solid;
-}
-
-.remote-cursor-0 { border-color: #2563eb; }
-.remote-cursor-1 { border-color: #f97316; }
-.remote-cursor-2 { border-color: #059669; }
-.remote-cursor-3 { border-color: #7c3aed; }
-.remote-cursor-4 { border-color: #e11d48; }
-.remote-cursor-5 { border-color: #ca8a04; }
-
 @media (max-width: 1040px) {
   .editor-page {
     height: auto;

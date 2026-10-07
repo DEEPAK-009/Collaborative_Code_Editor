@@ -1,62 +1,14 @@
 import Editor from "@monaco-editor/react";
-import { useEffect, useRef } from "react";
-
-const CURSOR_CLASSES = Array.from({ length: 6 }, (_, index) => `remote-cursor-${index}`);
+import { useRef } from "react";
 
 const CodeEditor = ({
   code,
   language,
   onChange,
-  onCursorMove,
   readOnly,
-  remoteCursors,
 }) => {
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
-  const decorationIdsRef = useRef([]);
-
-  const onCursorMoveRef = useRef(onCursorMove);
-
-  useEffect(() => {
-    onCursorMoveRef.current = onCursorMove;
-  }, [onCursorMove]);
-
-  useEffect(() => {
-    if (!editorRef.current || !monacoRef.current) {
-      return;
-    }
-
-    const model = editorRef.current.getModel();
-
-    if (!model) {
-      return;
-    }
-
-    const decorations = remoteCursors
-      .filter((cursor) => cursor?.position?.lineNumber && cursor?.position?.column)
-      .map((cursor, index) => {
-        const lineNumber = Math.min(
-          Math.max(cursor.position.lineNumber, 1),
-          model.getLineCount()
-        );
-        const maxColumn = model.getLineMaxColumn(lineNumber);
-        const column = Math.min(Math.max(cursor.position.column, 1), maxColumn);
-        const endColumn = Math.min(column + 1, maxColumn);
-
-        return {
-          range: new monacoRef.current.Range(lineNumber, column, lineNumber, endColumn),
-          options: {
-            className: CURSOR_CLASSES[index % CURSOR_CLASSES.length],
-            hoverMessage: cursor.displayName ? { value: cursor.displayName } : undefined,
-          },
-        };
-      });
-
-    decorationIdsRef.current = editorRef.current.deltaDecorations(
-      decorationIdsRef.current,
-      decorations
-    );
-  }, [remoteCursors]);
 
   const defineAndSetTheme = (monaco) => {
     if (!monaco) return;
@@ -88,10 +40,6 @@ const CodeEditor = ({
     editorRef.current = editor;
     monacoRef.current = monaco;
     defineAndSetTheme(monaco);
-
-    editor.onDidChangeCursorPosition((event) => {
-      onCursorMoveRef.current?.(event.position);
-    });
   };
 
   return (
