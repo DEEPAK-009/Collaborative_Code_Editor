@@ -86,11 +86,6 @@ const Home = () => {
       {/* Hero Section */}
       <main className="hero-section">
         <div className="hero-content">
-          <div className="hero-announcement-pill">
-            <span className="pill-pulse" />
-            <span className="pill-text">⚡ Realtime Multi-User Cloud IDE & Isolated Docker Runner</span>
-          </div>
-
           <h1 className="hero-heading">
             Code Together in Real Time. <br />
             <span className="text-gradient">Execute at the Speed of Thought.</span>
